@@ -1,3 +1,4 @@
+![FilamentWatchdog Logo](https://raw.githubusercontent.com/MKWebDesign/filament-watchdog-v5/main/art/logo.png)
 # FilamentWatchdog v5
 
 **Advanced security monitoring and intrusion detection plugin for FilamentPHP v5**
