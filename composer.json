@@ -1,0 +1,38 @@
+{
+    "name": "mkwebdesign/filament-watchdog-v5",
+    "description": "Advanced security monitoring and intrusion detection plugin for FilamentPHP v5",
+    "type": "library",
+    "version": "1.0.0",
+    "keywords": ["filament", "filament-v5", "security", "monitoring", "malware", "intrusion-detection"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Martin Knops",
+            "email": "info@mkwebdesign.nl",
+            "homepage": "https://mkwebdesign.nl"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "filament/filament": "^5.0",
+        "illuminate/contracts": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/database": "^11.0|^12.0|^13.0",
+        "illuminate/mail": "^11.0|^12.0|^13.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MKWebDesign\\FilamentWatchdog\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MKWebDesign\\FilamentWatchdog\\FilamentWatchdogServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
