@@ -1,0 +1,300 @@
+{
+    "version": "1.0.0",
+    "updated": "2026-04-22",
+    "signatures": [
+        {
+            "name": "php_eval",
+            "pattern": "/eval\\s*\\(/i",
+            "risk_level": "high",
+            "category": "code_execution",
+            "description": "eval() function - executes arbitrary PHP code"
+        },
+        {
+            "name": "php_system",
+            "pattern": "/\\bsystem\\s*\\(/i",
+            "risk_level": "critical",
+            "category": "command_execution",
+            "description": "system() - executes OS commands"
+        },
+        {
+            "name": "php_exec",
+            "pattern": "/\\bexec\\s*\\(/i",
+            "risk_level": "critical",
+            "category": "command_execution",
+            "description": "exec() - executes OS commands"
+        },
+        {
+            "name": "php_shell_exec",
+            "pattern": "/shell_exec\\s*\\(/i",
+            "risk_level": "critical",
+            "category": "command_execution",
+            "description": "shell_exec() - executes shell commands"
+        },
+        {
+            "name": "php_passthru",
+            "pattern": "/passthru\\s*\\(/i",
+            "risk_level": "critical",
+            "category": "command_execution",
+            "description": "passthru() - executes OS commands and passes raw output"
+        },
+        {
+            "name": "php_popen",
+            "pattern": "/\\bpopen\\s*\\(/i",
+            "risk_level": "critical",
+            "category": "command_execution",
+            "description": "popen() - opens process file pointer"
+        },
+        {
+            "name": "php_proc_open",
+            "pattern": "/proc_open\\s*\\(/i",
+            "risk_level": "critical",
+            "category": "command_execution",
+            "description": "proc_open() - opens a process with pipes"
+        },
+        {
+            "name": "backtick_execution",
+            "pattern": "/`[^`]+`/",
+            "risk_level": "high",
+            "category": "command_execution",
+            "description": "Backtick operator - shell command execution"
+        },
+        {
+            "name": "base64_eval",
+            "pattern": "/eval\\s*\\(\\s*base64_decode/i",
+            "risk_level": "critical",
+            "category": "obfuscation",
+            "description": "eval(base64_decode()) - classic obfuscated code execution"
+        },
+        {
+            "name": "base64_decode_chain",
+            "pattern": "/base64_decode\\s*\\(\\s*(?:str_replace|strrev|gzinflate|gzuncompress|str_rot13)/i",
+            "risk_level": "critical",
+            "category": "obfuscation",
+            "description": "Chained base64 decoding - obfuscation technique"
+        },
+        {
+            "name": "gzinflate_eval",
+            "pattern": "/eval\\s*\\(\\s*(?:gzinflate|gzuncompress|gzdecode|str_rot13)/i",
+            "risk_level": "critical",
+            "category": "obfuscation",
+            "description": "eval() with compression/encoding - obfuscated malware"
+        },
+        {
+            "name": "hex_eval",
+            "pattern": "/eval\\s*\\(\\s*(?:pack|hex2bin|unhex)/i",
+            "risk_level": "critical",
+            "category": "obfuscation",
+            "description": "eval() with hex encoding - obfuscated malware"
+        },
+        {
+            "name": "web_shell_get",
+            "pattern": "/\\$_(?:GET|POST|REQUEST|COOKIE)\\s*\\[\\s*['\"](?:cmd|command|exec|shell|run|c|e|0)/i",
+            "risk_level": "critical",
+            "category": "webshell",
+            "description": "Web shell - accepts commands via GET/POST/COOKIE"
+        },
+        {
+            "name": "web_shell_assert",
+            "pattern": "/assert\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)/i",
+            "risk_level": "critical",
+            "category": "webshell",
+            "description": "Web shell using assert() with user input"
+        },
+        {
+            "name": "web_shell_preg",
+            "pattern": "/preg_replace\\s*\\(\\s*['\"].*\\/e['\"][,\\s]/i",
+            "risk_level": "critical",
+            "category": "webshell",
+            "description": "preg_replace with /e modifier - code execution via regex"
+        },
+        {
+            "name": "create_function_eval",
+            "pattern": "/create_function\\s*\\(\\s*['\"][^'\"]*['\"]\\s*,\\s*['\"].*eval/i",
+            "risk_level": "critical",
+            "category": "code_execution",
+            "description": "create_function() with eval - dynamic code execution"
+        },
+        {
+            "name": "php_remote_include",
+            "pattern": "/(?:include|require)(?:_once)?\\s*\\(?\\s*['\"]https?:\\/\\//i",
+            "risk_level": "critical",
+            "category": "remote_inclusion",
+            "description": "Remote file inclusion via HTTP/HTTPS"
+        },
+        {
+            "name": "file_get_contents_remote",
+            "pattern": "/file_get_contents\\s*\\(\\s*['\"]https?:\\/\\//i",
+            "risk_level": "high",
+            "category": "remote_access",
+            "description": "file_get_contents() fetching remote URL"
+        },
+        {
+            "name": "curl_remote",
+            "pattern": "/curl_exec\\s*\\(/i",
+            "risk_level": "medium",
+            "category": "remote_access",
+            "description": "curl_exec() - remote HTTP request execution"
+        },
+        {
+            "name": "fsockopen_shell",
+            "pattern": "/fsockopen\\s*\\(/i",
+            "risk_level": "high",
+            "category": "network",
+            "description": "fsockopen() - raw socket connection, often used in reverse shells"
+        },
+        {
+            "name": "reverse_shell",
+            "pattern": "/fsockopen\\s*\\([^)]+\\).*shell_exec|shell_exec.*fsockopen/is",
+            "risk_level": "critical",
+            "category": "webshell",
+            "description": "Reverse shell pattern - combines socket and command execution"
+        },
+        {
+            "name": "php_chmod",
+            "pattern": "/chmod\\s*\\(\\s*[^,]+,\\s*0?777\\s*\\)/i",
+            "risk_level": "high",
+            "category": "filesystem",
+            "description": "chmod 777 - making files world-writable"
+        },
+        {
+            "name": "php_fwrite_php",
+            "pattern": "/fwrite\\s*\\([^,]+,\\s*['\"]<\\?php/i",
+            "risk_level": "critical",
+            "category": "filesystem",
+            "description": "Writing PHP code to file - potential dropper"
+        },
+        {
+            "name": "file_put_contents_php",
+            "pattern": "/file_put_contents\\s*\\([^,]+,\\s*(?:\\$[a-z_]+|['\"]<\\?)/i",
+            "risk_level": "high",
+            "category": "filesystem",
+            "description": "file_put_contents() writing potentially malicious content"
+        },
+        {
+            "name": "variable_variable",
+            "pattern": "/\\$\\{\\$[a-z_]+\\}/i",
+            "risk_level": "medium",
+            "category": "obfuscation",
+            "description": "Variable variables - often used in obfuscated code"
+        },
+        {
+            "name": "long_base64_string",
+            "pattern": "/['\"][A-Za-z0-9+\\/]{500,}={0,2}['\"]/",
+            "risk_level": "high",
+            "category": "obfuscation",
+            "description": "Long base64 encoded string - often contains obfuscated malware payload"
+        },
+        {
+            "name": "hex_string_long",
+            "pattern": "/(?:\\\\x[0-9a-f]{2}){20,}/i",
+            "risk_level": "high",
+            "category": "obfuscation",
+            "description": "Long hex-encoded string - obfuscation technique"
+        },
+        {
+            "name": "str_rot13_eval",
+            "pattern": "/eval\\s*\\(\\s*str_rot13/i",
+            "risk_level": "critical",
+            "category": "obfuscation",
+            "description": "eval(str_rot13()) - ROT13 obfuscated code execution"
+        },
+        {
+            "name": "assert_code",
+            "pattern": "/assert\\s*\\(\\s*['\"].*\\$_(GET|POST|REQUEST|COOKIE)/i",
+            "risk_level": "critical",
+            "category": "code_execution",
+            "description": "assert() with user-controlled input"
+        },
+        {
+            "name": "php_ini_set_disable",
+            "pattern": "/ini_set\\s*\\(\\s*['\"](?:disable_functions|safe_mode|open_basedir)['\"]\\s*,\\s*['\"]['\"]\\s*\\)/i",
+            "risk_level": "critical",
+            "category": "security_bypass",
+            "description": "Disabling PHP security restrictions via ini_set()"
+        },
+        {
+            "name": "php_dl",
+            "pattern": "/\\bdl\\s*\\(\\s*['\"][^'\"]+\\.(?:so|dll)['\"]\\s*\\)/i",
+            "risk_level": "critical",
+            "category": "code_execution",
+            "description": "dl() - loading PHP extensions dynamically"
+        },
+        {
+            "name": "posix_kill",
+            "pattern": "/posix_(?:kill|setuid|getpwuid|getgrgid)\\s*\\(/i",
+            "risk_level": "high",
+            "category": "privilege_escalation",
+            "description": "POSIX functions - privilege escalation attempt"
+        },
+        {
+            "name": "glob_shell",
+            "pattern": "/glob\\s*\\(.*\\$_(?:GET|POST|REQUEST)/i",
+            "risk_level": "high",
+            "category": "webshell",
+            "description": "glob() with user input - directory traversal"
+        },
+        {
+            "name": "php_mail_inject",
+            "pattern": "/mail\\s*\\([^)]*\\$_(?:GET|POST|REQUEST)/i",
+            "risk_level": "high",
+            "category": "injection",
+            "description": "mail() with user input - email header injection"
+        },
+        {
+            "name": "extract_overwrite",
+            "pattern": "/extract\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)/i",
+            "risk_level": "critical",
+            "category": "injection",
+            "description": "extract() with user input - variable injection"
+        },
+        {
+            "name": "php_unserialize_user",
+            "pattern": "/unserialize\\s*\\(\\s*\\$_(?:GET|POST|REQUEST|COOKIE)/i",
+            "risk_level": "critical",
+            "category": "injection",
+            "description": "unserialize() with user input - object injection"
+        },
+        {
+            "name": "known_webshell_c99",
+            "pattern": "/c99shell|c100shell|r57shell/i",
+            "risk_level": "critical",
+            "category": "webshell",
+            "description": "Known web shell signature (c99, r57)"
+        },
+        {
+            "name": "known_webshell_wso",
+            "pattern": "/WSOShell|WSO\\s*\\d+\\.\\d+/i",
+            "risk_level": "critical",
+            "category": "webshell",
+            "description": "Known web shell signature (WSO)"
+        },
+        {
+            "name": "known_backdoor_string",
+            "pattern": "/(?:backdoor|rootkit|hacktools?|h4ck(?:ed|ing)|0wned|pwn3d)/i",
+            "risk_level": "high",
+            "category": "webshell",
+            "description": "Known backdoor/hack tool identifier string"
+        },
+        {
+            "name": "mysql_dump_tool",
+            "pattern": "/(?:dumper|mysqldump|db_dump).*\\$_(?:GET|POST)/i",
+            "risk_level": "high",
+            "category": "data_exfiltration",
+            "description": "Database dump tool with user input - data exfiltration"
+        },
+        {
+            "name": "php_symlink_attack",
+            "pattern": "/symlink\\s*\\(\\s*['\"]['\\/]/i",
+            "risk_level": "high",
+            "category": "filesystem",
+            "description": "symlink() to root - filesystem traversal attack"
+        },
+        {
+            "name": "php_disable_error",
+            "pattern": "/error_reporting\\s*\\(\\s*0\\s*\\)\\s*;.*@/s",
+            "risk_level": "medium",
+            "category": "obfuscation",
+            "description": "Disabling error reporting combined with @ suppression - hiding malicious activity"
+        }
+    ]
+}
