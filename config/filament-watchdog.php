@@ -85,22 +85,23 @@ return [
     | Alert Settings
     |--------------------------------------------------------------------------
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Alert Settings
+    |--------------------------------------------------------------------------
+    */
     'alerts' => [
         'enabled' => true,
-        'email_enabled' => true,
-        'email_recipients' => [
-            'security@jouwdomein.com', // Vervang met jouw email
-        ],
-        'admin_emails' => [
-            'admin@jouwdomein.com',     // Vervang met jouw admin email
-            'security@jouwdomein.com',  // Vervang met jouw security email
-        ],
-        'alert_levels' => [
-            'low' => 1,
-            'medium' => 2,
-            'high' => 3,
-            'critical' => 4,
-        ],
+
+        // Enable or disable email notifications
+        'email_enabled' => env('WATCHDOG_EMAIL_ENABLED', true),
+
+        // Recipients for security alert emails
+        'email_recipients' => array_filter(explode(',', env('WATCHDOG_EMAIL_RECIPIENTS', ''))),
+
+        // Minimum severity level to trigger an email alert: low, medium, high, critical
+        'min_severity' => env('WATCHDOG_MIN_SEVERITY', 'high'),
+
         'rate_limiting' => [
             'enabled' => true,
             'max_alerts_per_hour' => 10,
