@@ -16,6 +16,8 @@ use MKWebDesign\FilamentWatchdog\Services\MalwareDetectionService;
 use MKWebDesign\FilamentWatchdog\Services\EmergencyLockdownService;
 use Illuminate\Support\Facades\File;
 use MKWebDesign\FilamentWatchdog\Traits\ConfiguresWatchdogNavigation;
+use MKWebDesign\FilamentWatchdog\Services\SignatureUpdateService;
+use MKWebDesign\FilamentWatchdog\Models\MalwareSignature;
 
 class SecurityDashboard extends Page
 {
@@ -112,6 +114,43 @@ class SecurityDashboard extends Page
                     } catch (\Exception $e) {
                         Notification::make()
                             ->title('Baseline Creation Failed')
+                            ->body('Error: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
+
+            Action::make('updateSignatures')
+                ->label('Update Signatures')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('info')
+                ->requiresConfirmation()
+                ->modalHeading('Update Malware Signatures')
+                ->modalDescription('This will fetch the latest malware signatures from the remote database. Internet access is required.')
+                ->modalSubmitActionLabel('Update Now')
+                ->action(function () {
+                    try {
+                        $service = app(SignatureUpdateService::class);
+                        $result = $service->update();
+
+                        if ($result['success']) {
+                            Notification::make()
+                                ->title('Signatures Updated')
+                                ->body($result['message'] . ' (version: ' . $result['version'] . '). Total active: ' . $service->getSignatureCount())
+                                ->success()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('Update Failed')
+                                ->body('Could not fetch signatures: ' . $result['message'])
+                                ->danger()
+                                ->send();
+                        }
+
+                        $this->redirect(static::getUrl());
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Update Failed')
                             ->body('Error: ' . $e->getMessage())
                             ->danger()
                             ->send();

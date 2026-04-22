@@ -16,6 +16,7 @@ use MKWebDesign\FilamentWatchdog\Services\MalwareDetectionService;
 use MKWebDesign\FilamentWatchdog\Services\ActivityMonitoringService;
 use MKWebDesign\FilamentWatchdog\Services\AlertService;
 use MKWebDesign\FilamentWatchdog\Services\EmergencyLockdownService;
+use MKWebDesign\FilamentWatchdog\Commands\UpdateSignaturesCommand;
 
 class FilamentWatchdogServiceProvider extends ServiceProvider
 {
@@ -54,6 +55,7 @@ class FilamentWatchdogServiceProvider extends ServiceProvider
         // Register commands
         if ($this->app->runningInConsole()) {
             $this->commands([
+                UpdateSignaturesCommand::class,
                 ScanFilesCommand::class,
                 CreateBaselineCommand::class,
                 CleanupLogsCommand::class,
@@ -79,6 +81,8 @@ class FilamentWatchdogServiceProvider extends ServiceProvider
 
             // Cleanup logs daily
             $schedule->command('watchdog:cleanup', ['--force'])->daily();
+            $schedule->command('watchdog:update-signatures')->weekly();
+
         });
     }
 
@@ -201,7 +205,7 @@ class FilamentWatchdogServiceProvider extends ServiceProvider
         <div class="icon">🚨</div>
         <h1>Emergency Security Lockdown</h1>
         <p>
-            Our security system has temporarily restricted access to protect your data. 
+            Our security system has temporarily restricted access to protect your data.
             We are working to resolve this situation as quickly as possible.
         </p>
         <div class="status">

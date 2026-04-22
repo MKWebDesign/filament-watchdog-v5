@@ -52,6 +52,7 @@ return [
         'scan_uploads' => true,
         'quarantine_enabled' => true,
         'quarantine_path' => storage_path('app/quarantine'),
+        'signatures_url' => env('WATCHDOG_SIGNATURES_URL', 'https://raw.githubusercontent.com/MKWebDesign/filament-watchdog-v5/main/signatures.json'),
         'signatures' => [
             'php_eval' => '/eval\s*\(/i',
             'php_system' => '/system\s*\(/i',
