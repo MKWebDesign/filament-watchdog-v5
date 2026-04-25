@@ -194,7 +194,7 @@ class FileIntegrityService
         return false;
     }
 
-    public function quarantineFile(string $filePath): bool
+    public function quarantineFile(string $filePath): string|false
     {
         $quarantinePath = config('filament-watchdog.malware_detection.quarantine_path');
 
@@ -213,7 +213,7 @@ class FileIntegrityService
                 'high',
                 ['original_path' => $filePath, 'quarantine_path' => $quarantineFile]
             );
-            return true;
+            return $quarantineFile;
         }
 
         return false;
