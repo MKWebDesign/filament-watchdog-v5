@@ -1,7 +1,7 @@
 <x-filament-widgets::widget>
     <x-filament::section>
         <x-slot name="heading">
-            Current Threat Level
+            {{ __('filament-watchdog-v5::messages.widget.threat_level_widget.title') }}
         </x-slot>
 
         <div class="text-center">
@@ -42,13 +42,13 @@
             @if($critical_count > 0 || $high_count > 0 || $malware_count > 0)
                 <div class="text-xs text-gray-500 dark:text-gray-500 space-y-1">
                     @if($critical_count > 0)
-                        <div>{{ $critical_count }} critical alert(s)</div>
+                        <div>{{ $critical_count }} {{ __('filament-watchdog-v5::messages.widget.threat_level_widget.critical_alerts') }}</div>
                     @endif
                     @if($high_count > 0)
-                        <div>{{ $high_count }} high alert(s)</div>
+                        <div>{{ $high_count }} {{ __('filament-watchdog-v5::messages.widget.threat_level_widget.high_alerts') }}</div>
                     @endif
                     @if($malware_count > 0)
-                        <div>{{ $malware_count }} malware detected</div>
+                        <div>{{ $malware_count }} {{ __('filament-watchdog-v5::messages.widget.threat_level_widget.malware_detected') }}</div>
                     @endif
                 </div>
             @endif

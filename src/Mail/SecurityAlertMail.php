@@ -21,14 +21,14 @@ class SecurityAlertMail extends Mailable
     {
         $severity = strtoupper($this->alert->severity);
         $prefix = match ($this->alert->severity) {
-            'critical' => '[CRITICAL]',
-            'high'     => '[HIGH]',
-            'medium'   => '[MEDIUM]',
-            default    => '[INFO]',
+            'critical' => __('filament-watchdog-v5::messages.mail.security_alert.prefix_critical'),
+            'high'     => __('filament-watchdog-v5::messages.mail.security_alert.prefix_high'),
+            'medium'   => __('filament-watchdog-v5::messages.mail.security_alert.prefix_medium'),
+            default    => __('filament-watchdog-v5::messages.mail.security_alert.prefix_info'),
         };
 
         return new Envelope(
-            subject: "{$prefix} Security Alert: {$this->alert->title}",
+            subject: __('filament-watchdog-v5::messages.mail.security_alert.subject', ['prefix' => $prefix, 'title' => $this->alert->title]),
         );
     }
 

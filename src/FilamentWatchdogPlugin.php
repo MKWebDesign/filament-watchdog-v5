@@ -79,7 +79,7 @@ class FilamentWatchdogPlugin implements Plugin
         // Note: Panel::navigationGroups() merges internally, so we must NOT spread
         // existing groups ourselves — just pass the new group and let Filament merge it.
         $alreadyRegistered = collect($panel->getNavigationGroups())->contains(
-            fn ($group) => $group instanceof NavigationGroup && $group->getLabel() === 'Security'
+            fn ($group) => $group instanceof NavigationGroup && $group->getLabel() === __('filament-watchdog-v5::messages.navigation.group')
         );
 
         if ($alreadyRegistered) {
@@ -87,7 +87,7 @@ class FilamentWatchdogPlugin implements Plugin
         }
 
         $panel->navigationGroups([
-            NavigationGroup::make('Security')
+            NavigationGroup::make(__('filament-watchdog-v5::messages.navigation.group'))
                 ->collapsed($collapsed)
                 ->collapsible(true),
         ]);

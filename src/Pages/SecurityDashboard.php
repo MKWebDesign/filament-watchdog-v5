@@ -34,10 +34,19 @@ class SecurityDashboard extends Page
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
     protected string $view = 'filament-watchdog::pages.security-dashboard';
-    protected static string|\UnitEnum|null $navigationGroup = 'Security';
+    protected static string|\UnitEnum|null $navigationGroup = null;
     protected static ?int $navigationSort = 1;
-    protected static ?string $title = 'Security Dashboard';
     protected static ?string $slug = 'security/dashboard';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament-watchdog-v5::messages.navigation.group');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament-watchdog-v5::messages.page.dashboard.title');
+    }
 
     /**
      * Define the sort order for this security item
@@ -55,13 +64,13 @@ class SecurityDashboard extends Page
 
         return [
             Action::make('runScan')
-                ->label('Run Manual Scan')
+                ->label(__('filament-watchdog-v5::messages.page.dashboard.actions.run_scan.label'))
                 ->icon('heroicon-o-magnifying-glass')
                 ->color('primary')
                 ->requiresConfirmation()
-                ->modalHeading('Run Security Scan')
-                ->modalDescription('This will scan all files for changes and malware. This may take a few minutes.')
-                ->modalSubmitActionLabel('Start Scan')
+                ->modalHeading(__('filament-watchdog-v5::messages.page.dashboard.actions.run_scan.modal_heading'))
+                ->modalDescription(__('filament-watchdog-v5::messages.page.dashboard.actions.run_scan.modal_description'))
+                ->modalSubmitActionLabel(__('filament-watchdog-v5::messages.page.dashboard.actions.run_scan.submit_label'))
                 ->action(function () {
                     try {
                         $fileIntegrityService = app(FileIntegrityService::class);
@@ -74,29 +83,29 @@ class SecurityDashboard extends Page
                         $malwareCount = count($malwareDetections);
 
                         Notification::make()
-                            ->title('Security Scan Completed')
-                            ->body('Found ' . $changeCount . ' file changes and ' . $malwareCount . ' malware detections.')
+                            ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.scan_completed.title'))
+                            ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.scan_completed.body', ['changes' => $changeCount, 'malware' => $malwareCount]))
                             ->success()
                             ->send();
 
                         $this->redirect(static::getUrl());
                     } catch (\Exception $e) {
                         Notification::make()
-                            ->title('Scan Failed')
-                            ->body('Error: ' . $e->getMessage())
+                            ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.scan_failed.title'))
+                            ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.error_prefix') . ' ' . $e->getMessage())
                             ->danger()
                             ->send();
                     }
                 }),
 
             Action::make('createBaseline')
-                ->label('Create Baseline')
+                ->label(__('filament-watchdog-v5::messages.page.dashboard.actions.create_baseline.label'))
                 ->icon('heroicon-o-document-duplicate')
                 ->color('success')
                 ->requiresConfirmation()
-                ->modalHeading('Create New Baseline')
-                ->modalDescription('This will create a new baseline of all files. Existing change records will be reset.')
-                ->modalSubmitActionLabel('Create Baseline')
+                ->modalHeading(__('filament-watchdog-v5::messages.page.dashboard.actions.create_baseline.modal_heading'))
+                ->modalDescription(__('filament-watchdog-v5::messages.page.dashboard.actions.create_baseline.modal_description'))
+                ->modalSubmitActionLabel(__('filament-watchdog-v5::messages.page.dashboard.actions.create_baseline.submit_label'))
                 ->action(function () {
                     try {
                         $fileIntegrityService = app(FileIntegrityService::class);
@@ -105,29 +114,29 @@ class SecurityDashboard extends Page
                         $totalFiles = FileIntegrityCheck::count();
 
                         Notification::make()
-                            ->title('Baseline Created')
-                            ->body('New security baseline created for ' . $totalFiles . ' files.')
+                            ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.baseline_created.title'))
+                            ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.baseline_created.body', ['files' => $totalFiles]))
                             ->success()
                             ->send();
 
                         $this->redirect(static::getUrl());
                     } catch (\Exception $e) {
                         Notification::make()
-                            ->title('Baseline Creation Failed')
-                            ->body('Error: ' . $e->getMessage())
+                            ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.baseline_failed.title'))
+                            ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.error_prefix') . ' ' . $e->getMessage())
                             ->danger()
                             ->send();
                     }
                 }),
 
             Action::make('updateSignatures')
-                ->label('Update Signatures')
+                ->label(__('filament-watchdog-v5::messages.page.dashboard.actions.update_signatures.label'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->color('info')
                 ->requiresConfirmation()
-                ->modalHeading('Update Malware Signatures')
-                ->modalDescription('This will fetch the latest malware signatures from the remote database. Internet access is required.')
-                ->modalSubmitActionLabel('Update Now')
+                ->modalHeading(__('filament-watchdog-v5::messages.page.dashboard.actions.update_signatures.modal_heading'))
+                ->modalDescription(__('filament-watchdog-v5::messages.page.dashboard.actions.update_signatures.modal_description'))
+                ->modalSubmitActionLabel(__('filament-watchdog-v5::messages.page.dashboard.actions.update_signatures.submit_label'))
                 ->action(function () {
                     try {
                         $service = app(SignatureUpdateService::class);
@@ -135,14 +144,14 @@ class SecurityDashboard extends Page
 
                         if ($result['success']) {
                             Notification::make()
-                                ->title('Signatures Updated')
-                                ->body($result['message'] . ' (version: ' . $result['version'] . '). Total active: ' . $service->getSignatureCount())
+                                ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.signatures_updated.title'))
+                                ->body($result['message'] . ' (' . __('filament-watchdog-v5::messages.page.dashboard.notifications.signatures_updated.version') . ': ' . $result['version'] . '). ' . __('filament-watchdog-v5::messages.page.dashboard.notifications.signatures_updated.total_active') . ': ' . $service->getSignatureCount())
                                 ->success()
                                 ->send();
                         } else {
                             Notification::make()
-                                ->title('Update Failed')
-                                ->body('Could not fetch signatures: ' . $result['message'])
+                                ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.signatures_failed.title'))
+                                ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.signatures_failed.body') . ' ' . $result['message'])
                                 ->danger()
                                 ->send();
                         }
@@ -150,15 +159,15 @@ class SecurityDashboard extends Page
                         $this->redirect(static::getUrl());
                     } catch (\Exception $e) {
                         Notification::make()
-                            ->title('Update Failed')
-                            ->body('Error: ' . $e->getMessage())
+                            ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.signatures_failed.title'))
+                            ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.error_prefix') . ' ' . $e->getMessage())
                             ->danger()
                             ->send();
                     }
                 }),
 
             Action::make('viewQuarantine')
-                ->label('View Quarantine')
+                ->label(__('filament-watchdog-v5::messages.page.dashboard.actions.view_quarantine.label'))
                 ->icon('heroicon-o-archive-box')
                 ->color('warning')
                 ->action(function () {
@@ -180,21 +189,21 @@ class SecurityDashboard extends Page
                             })->join(', ');
 
                             Notification::make()
-                                ->title('Quarantine Status')
-                                ->body('Found ' . $fileCount . ' quarantined file(s): ' . $fileList . ($fileCount > 5 ? ' and ' . ($fileCount - 5) . ' more...' : ''))
+                                ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.quarantine_status.title'))
+                                ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.quarantine_status.found', ['count' => $fileCount, 'files' => $fileList, 'more' => ($fileCount > 5 ? __('filament-watchdog-v5::messages.page.dashboard.notifications.quarantine_status.and_more', ['count' => $fileCount - 5]) : '')]))
                                 ->warning()
                                 ->send();
                         } else {
                             Notification::make()
-                                ->title('Quarantine Empty')
-                                ->body('Quarantine directory exists but contains no files.')
+                                ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.quarantine_empty.title'))
+                                ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.quarantine_empty.body'))
                                 ->success()
                                 ->send();
                         }
                     } else {
                         Notification::make()
-                            ->title('Quarantine Not Found')
-                            ->body('Quarantine directory does not exist: ' . $quarantinePath)
+                            ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.quarantine_missing.title'))
+                            ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.quarantine_missing.body') . ' ' . $quarantinePath)
                             ->info()
                             ->send();
                     }
@@ -202,28 +211,16 @@ class SecurityDashboard extends Page
 
             // Enhanced Emergency Lockdown Action
             Action::make($isLockdownActive ? 'deactivateLockdown' : 'emergencyLockdown')
-                ->label($isLockdownActive ? '🔓 Deactivate Lockdown' : '🚨 Emergency Lockdown')
+                ->label($isLockdownActive ? __('filament-watchdog-v5::messages.page.dashboard.actions.lockdown.deactivate_label') : __('filament-watchdog-v5::messages.page.dashboard.actions.lockdown.activate_label'))
                 ->icon($isLockdownActive ? 'heroicon-o-lock-open' : 'heroicon-o-lock-closed')
                 ->color($isLockdownActive ? 'success' : 'danger')
                 ->requiresConfirmation()
-                ->modalHeading($isLockdownActive ? '🔓 Deactivate Emergency Lockdown' : '⚠️ ACTIVATE EMERGENCY LOCKDOWN')
+                ->modalHeading($isLockdownActive ? __('filament-watchdog-v5::messages.page.dashboard.actions.lockdown.deactivate_heading') : __('filament-watchdog-v5::messages.page.dashboard.actions.lockdown.activate_heading'))
                 ->modalDescription($isLockdownActive ?
-                    'This will deactivate the emergency lockdown and restore normal system operations. Users will regain access to the website.' :
-                    new \Illuminate\Support\HtmlString('
-                        ⚠️ WARNING: This will activate a FULL SYSTEM LOCKDOWN including:<br><br>
-                        <div style="text-align: left; font-size: 16px;" class="text-left">
-                        - <svg class="inline w-4 h-4 text-red-500" fill="#dc2626" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm-3.75 8.25v-3a3.75 3.75 0 117.5 0v3h-7.5z" clip-rule="evenodd" /></svg> Enable maintenance mode (blocks entire site)<br>
-                        - <svg class="inline w-4 h-4 text-red-500" fill="#dc2626" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.814 3.051 10.077 9.75 12.98a.75.75 0 00.5 0c6.699-2.903 9.75-7.166 9.75-12.98 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.515 11.209 11.209 0 01-7.877-3.08z" clip-rule="evenodd" /></svg> Block suspicious IP addresses automatically<br>
-                        - <svg class="inline w-4 h-4 text-blue-500" fill="#2563eb" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.25 6.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM15.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM2.25 9.75a3 3 0 116 0 3 3 0 01-6 0zM6.31 15.117A6.745 6.745 0 0112 12a6.745 6.745 0 016.709 7.498.75.75 0 01-.372.568A12.696 12.696 0 0112 21.75c-2.305 0-4.47-.612-6.337-1.684a.75.75 0 01-.372.568 6.787 6.787 0 011.019-1.381z" clip-rule="evenodd" /></svg> Clear all user sessions (except yours)<br>
-                        - <svg class="inline w-4 h-4 text-green-500" fill="#16a34a" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M15.75 1.5a6.75 6.75 0 00-6.651 7.906c.067.39-.032.717-.221.906l-6.5 6.499a3 3 0 00-.878 2.121v2.818c0 .414.336.75.75.75H6a.75.75 0 00.75-.75v-1.5h1.5A.75.75 0 009 19.5V18h1.5a.75.75 0 00.53-.22l2.658-2.658c.19-.189.517-.288.906-.22A6.75 6.75 0 1015.75 1.5zm0 3a.75.75 0 000 1.5A2.25 2.25 0 0118 8.25a.75.75 0 001.5 0 3.75 3.75 0 00-3.75-3.75z" clip-rule="evenodd" /></svg> Add emergency .htaccess protection<br>
-                        - <svg class="inline w-4 h-4 text-blue-500" fill="#2563eb" viewBox="0 0 24 24"><path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" /><path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" /></svg> Notify all administrators immediately<br>
-                        - <svg class="inline w-4 h-4 text-purple-500" fill="#9333ea" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M19.5 21a3 3 0 003-3V9a3 3 0 00-3-3h-5.379a.75.75 0 01-.53-.22L11.47 3.66A2.25 2.25 0 009.879 3H4.5a3 3 0 00-3 3v12a3 3 0 003 3h15zm-6.75-10.5a.75.75 0 00-1.5 0v4.19l-1.72-1.72a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l3-3a.75.75 0 10-1.06-1.06l-1.72 1.72V10.5z" clip-rule="evenodd" /></svg> Create emergency backup of critical files<br><br>
-                        </div>
-                        <strong>Use ONLY in case of active security threats or breaches!</strong><br><br>
-                        The entire website will be inaccessible to users until you deactivate the lockdown.
-                    ')
+                    __('filament-watchdog-v5::messages.page.dashboard.actions.lockdown.deactivate_description') :
+                    new \Illuminate\Support\HtmlString(__('filament-watchdog-v5::messages.page.dashboard.actions.lockdown.activate_description'))
                 )
-                ->modalSubmitActionLabel($isLockdownActive ? 'Deactivate Lockdown' : '🚨 ACTIVATE LOCKDOWN')
+                ->modalSubmitActionLabel($isLockdownActive ? __('filament-watchdog-v5::messages.page.dashboard.actions.lockdown.deactivate_submit') : __('filament-watchdog-v5::messages.page.dashboard.actions.lockdown.activate_submit'))
                 ->action(function () use ($lockdownService, $isLockdownActive) {
                     try {
                         if ($isLockdownActive) {
@@ -232,8 +229,8 @@ class SecurityDashboard extends Page
 
                             if ($results['status'] === 'success') {
                                 Notification::make()
-                                    ->title('✅ Emergency Lockdown Deactivated')
-                                    ->body('System lockdown has been deactivated. Normal operations resumed. Users restored: ' . ($results['users_restored'] ?? 0))
+                                    ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.lockdown_deactivated.title'))
+                                    ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.lockdown_deactivated.body', ['users' => ($results['users_restored'] ?? 0)]))
                                     ->success()
                                     ->persistent()
                                     ->send();
@@ -254,17 +251,20 @@ class SecurityDashboard extends Page
 
                             if ($results['status'] === 'success') {
                                 $accessUrl = $lockdownService->getEmergencyAccessUrl();
+                                
+                                $backupStatus = $results['emergency_backup'] ? 
+                                    __('filament-watchdog-v5::messages.page.dashboard.notifications.lockdown_activated.backup_created') : 
+                                    __('filament-watchdog-v5::messages.page.dashboard.notifications.lockdown_activated.backup_failed');
 
                                 Notification::make()
-                                    ->title('🚨 EMERGENCY LOCKDOWN ACTIVATED')
-                                    ->body('Critical security lockdown activated! Alert ID: ' . $results['alert_id'] . '
-
-🔑 Emergency Access URL: ' . $accessUrl . '
-📧 Administrators notified: ' . ($results['admin_notifications'] ?? 0) . '
-🚫 IPs blocked: ' . count($results['blocked_ips'] ?? []) . '
-💾 Emergency backup: ' . ($results['emergency_backup'] ? '✅ Created' : '❌ Failed') . '
-
-⚠️ WEBSITE IS NOW IN MAINTENANCE MODE - Only you can access it!')
+                                    ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.lockdown_activated.title'))
+                                    ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.lockdown_activated.body', [
+                                        'alert_id' => $results['alert_id'],
+                                        'url' => $accessUrl,
+                                        'admins' => ($results['admin_notifications'] ?? 0),
+                                        'ips' => count($results['blocked_ips'] ?? []),
+                                        'backup' => $backupStatus
+                                    ]))
                                     ->danger()
                                     ->persistent()
                                     ->send();
@@ -276,15 +276,15 @@ class SecurityDashboard extends Page
                         $this->redirect(static::getUrl());
                     } catch (\Exception $e) {
                         Notification::make()
-                            ->title($isLockdownActive ? 'Lockdown Deactivation Failed' : 'Lockdown Activation Failed')
-                            ->body('Error: ' . $e->getMessage())
+                            ->title($isLockdownActive ? __('filament-watchdog-v5::messages.page.dashboard.notifications.deactivation_failed.title') : __('filament-watchdog-v5::messages.page.dashboard.notifications.activation_failed.title'))
+                            ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.error_prefix') . ' ' . $e->getMessage())
                             ->danger()
                             ->send();
                     }
                 }),
 
             Action::make('lockdownStatus')
-                ->label('Lockdown Status')
+                ->label(__('filament-watchdog-v5::messages.page.dashboard.actions.lockdown_status.label'))
                 ->icon('heroicon-o-information-circle')
                 ->color('gray')
                 ->visible($isLockdownActive)
@@ -294,12 +294,13 @@ class SecurityDashboard extends Page
 
                     if ($status) {
                         Notification::make()
-                            ->title('🚨 Emergency Lockdown Status')
-                            ->body('Lockdown ID: ' . $status['lockdown_id'] . '
-Activated by: ' . $status['activated_by'] . '
-Activated at: ' . $status['activated_at']->format('Y-m-d H:i:s') . '
-
-🔑 Emergency Access: ' . $accessUrl)
+                            ->title(__('filament-watchdog-v5::messages.page.dashboard.notifications.lockdown_status.title'))
+                            ->body(__('filament-watchdog-v5::messages.page.dashboard.notifications.lockdown_status.body', [
+                                'id' => $status['lockdown_id'],
+                                'by' => $status['activated_by'],
+                                'at' => $status['activated_at']->format('Y-m-d H:i:s'),
+                                'url' => $accessUrl
+                            ]))
                             ->info()
                             ->persistent()
                             ->send();
@@ -319,7 +320,7 @@ Activated at: ' . $status['activated_at']->format('Y-m-d H:i:s') . '
 
     public function getTitle(): string
     {
-        return 'Security Dashboard';
+        return __('filament-watchdog-v5::messages.page.dashboard.title');
     }
 
     public function getHeading(): string
@@ -328,10 +329,10 @@ Activated at: ' . $status['activated_at']->format('Y-m-d H:i:s') . '
         $isLockdownActive = $lockdownService->isLockdownActive();
 
         if ($isLockdownActive) {
-            return '🚨 Security Dashboard - EMERGENCY LOCKDOWN ACTIVE';
+            return __('filament-watchdog-v5::messages.page.dashboard.heading_lockdown');
         }
 
-        return 'Security Dashboard';
+        return __('filament-watchdog-v5::messages.page.dashboard.title');
     }
 
     protected function getViewData(): array

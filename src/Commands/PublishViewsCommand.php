@@ -12,11 +12,17 @@ class PublishViewsCommand extends Command
                             {--only-emergency : Only publish emergency views}
                             {--preview : Preview what will be published}';
 
-    protected $description = 'Publish FilamentWatchdog views including emergency maintenance page';
+    protected $description = null;
+
+    public function __construct()
+    {
+        $this->description = __('filament-watchdog-v5::messages.command.publish.description');
+        parent::__construct();
+    }
 
     public function handle(): int
     {
-        $this->info('📦 Publishing FilamentWatchdog Views...');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.publishing'));
         $this->newLine();
 
         $onlyEmergency = $this->option('only-emergency');
@@ -42,7 +48,7 @@ class PublishViewsCommand extends Command
 
     private function publishAllViews(bool $force): void
     {
-        $this->info('📄 Publishing package views...');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.package_views'));
 
         $this->call('vendor:publish', [
             '--provider' => 'MKWebDesign\\FilamentWatchdog\\FilamentWatchdogServiceProvider',
@@ -50,12 +56,12 @@ class PublishViewsCommand extends Command
             '--force' => $force,
         ]);
 
-        $this->info('✅ Package views published');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.package_views_success'));
     }
 
     private function publishEmergencyViews(bool $force): int
     {
-        $this->info('🚨 Publishing emergency maintenance views...');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.emergency_views'));
 
         $sourceDir = __DIR__ . '/../../resources/views/errors';
         $targetDir = resource_path('views/errors');
@@ -64,7 +70,7 @@ class PublishViewsCommand extends Command
         // Ensure target directory exists
         if (!File::exists($targetDir)) {
             File::makeDirectory($targetDir, 0755, true);
-            $this->info("📁 Created directory: {$targetDir}");
+            $this->info(__('filament-watchdog-v5::messages.command.publish.created_dir', ['dir' => $targetDir]));
         }
 
         $sourcePath = $sourceDir . '/' . $emergencyView;
@@ -72,14 +78,14 @@ class PublishViewsCommand extends Command
 
         // Check if source exists
         if (!File::exists($sourcePath)) {
-            $this->warn("⚠️  Source view not found, creating fallback emergency view...");
+            $this->warn(__('filament-watchdog-v5::messages.command.publish.source_not_found'));
             return $this->createFallbackEmergencyView($targetPath, $force);
         }
 
         // Check if target exists and handle force option
         if (File::exists($targetPath) && !$force) {
-            if (!$this->confirm("Emergency view already exists. Overwrite?")) {
-                $this->warn("⚠️  Skipped: {$emergencyView}");
+            if (!$this->confirm(__('filament-watchdog-v5::messages.command.publish.confirm_overwrite'))) {
+                $this->warn(__('filament-watchdog-v5::messages.command.publish.skipped', ['file' => $emergencyView]));
                 return 0;
             }
         }
@@ -87,17 +93,17 @@ class PublishViewsCommand extends Command
         // Copy the file
         try {
             File::copy($sourcePath, $targetPath);
-            $this->info("✅ Published: {$emergencyView}");
+            $this->info(__('filament-watchdog-v5::messages.command.publish.published', ['file' => $emergencyView]));
 
             // Verify the file was created correctly
             if (File::exists($targetPath)) {
                 $size = File::size($targetPath);
-                $this->info("📊 File size: " . number_format($size) . " bytes");
+                $this->info(__('filament-watchdog-v5::messages.command.publish.file_size', ['size' => number_format($size)]));
             }
 
             return 0;
         } catch (\Exception $e) {
-            $this->error("❌ Failed to publish emergency view: " . $e->getMessage());
+            $this->error(__('filament-watchdog-v5::messages.command.publish.publish_failed', ['error' => $e->getMessage()]));
             return 1;
         }
     }
@@ -105,8 +111,8 @@ class PublishViewsCommand extends Command
     private function createFallbackEmergencyView(string $targetPath, bool $force): int
     {
         if (File::exists($targetPath) && !$force) {
-            if (!$this->confirm("Emergency view already exists. Overwrite with fallback?")) {
-                $this->warn("⚠️  Skipped fallback creation");
+            if (!$this->confirm(__('filament-watchdog-v5::messages.command.publish.confirm_fallback'))) {
+                $this->warn(__('filament-watchdog-v5::messages.command.publish.skipped_fallback'));
                 return 0;
             }
         }
@@ -114,21 +120,21 @@ class PublishViewsCommand extends Command
         try {
             $fallbackContent = $this->getFallbackEmergencyTemplate();
             File::put($targetPath, $fallbackContent);
-            $this->info("✅ Created fallback emergency view");
+            $this->info(__('filament-watchdog-v5::messages.command.publish.fallback_success'));
 
             $size = File::size($targetPath);
-            $this->info("📊 File size: " . number_format($size) . " bytes");
+            $this->info(__('filament-watchdog-v5::messages.command.publish.file_size', ['size' => number_format($size)]));
 
             return 0;
         } catch (\Exception $e) {
-            $this->error("❌ Failed to create fallback emergency view: " . $e->getMessage());
+            $this->error(__('filament-watchdog-v5::messages.command.publish.fallback_failed', ['error' => $e->getMessage()]));
             return 1;
         }
     }
 
     private function showPreview(): int
     {
-        $this->info('📋 Preview of files to be published:');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.preview_title'));
         $this->newLine();
 
         $files = [
@@ -138,16 +144,16 @@ class PublishViewsCommand extends Command
         ];
 
         foreach ($files as $type => $path) {
-            $status = '📄';
+            $status = __('filament-watchdog-v5::messages.command.publish.status_missing');
             if (File::exists(base_path($path))) {
-                $status = '✅ (exists)';
+                $status = __('filament-watchdog-v5::messages.command.publish.status_exists');
             }
             $this->line("  {$status} {$type}: {$path}");
         }
 
         $this->newLine();
-        $this->info('💡 Use --force to overwrite existing files');
-        $this->info('💡 Use --only-emergency to publish only the emergency view');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.tip_force'));
+        $this->info(__('filament-watchdog-v5::messages.command.publish.tip_only_emergency'));
 
         return 0;
     }
@@ -155,26 +161,26 @@ class PublishViewsCommand extends Command
     private function displaySuccessMessage(): void
     {
         $this->newLine();
-        $this->info('✅ All views published successfully!');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.success_all'));
         $this->newLine();
 
-        $this->info('📋 Published files:');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.published_files'));
         $this->line('  - resources/views/errors/emergency-lockdown.blade.php');
         $this->line('  - resources/views/vendor/filament-watchdog/');
 
         $this->newLine();
-        $this->info('🎨 Customization options:');
-        $this->line('  - Edit emergency view: resources/views/errors/emergency-lockdown.blade.php');
-        $this->line('  - Configure colors/text: config/filament-watchdog.php (emergency section)');
-        $this->line('  - Publish config: php artisan vendor:publish --tag=filament-watchdog-config');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.customization'));
+        $this->line(__('filament-watchdog-v5::messages.command.publish.edit_emergency'));
+        $this->line(__('filament-watchdog-v5::messages.command.publish.configure_colors'));
+        $this->line(__('filament-watchdog-v5::messages.command.publish.publish_config'));
 
         $this->newLine();
-        $this->info('🧪 Test emergency lockdown:');
-        $this->line('  - php artisan watchdog:emergency-lockdown activate');
-        $this->line('  - php artisan watchdog:emergency-lockdown deactivate');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.test_emergency'));
+        $this->line(__('filament-watchdog-v5::messages.command.publish.test_activate'));
+        $this->line(__('filament-watchdog-v5::messages.command.publish.test_deactivate'));
 
         $this->newLine();
-        $this->info('📧 Don\'t forget to configure admin email addresses in config/filament-watchdog.php!');
+        $this->info(__('filament-watchdog-v5::messages.command.publish.dont_forget'));
     }
 
     private function getFallbackEmergencyTemplate(): string

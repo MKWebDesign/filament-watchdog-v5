@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 Emergency Security Lockdown - FilamentWatchdog</title>
+    <title>{{ __("filament-watchdog-v5::messages.service.emergency.view.title") }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -214,56 +214,54 @@
 <div class="container">
     <div class="lockdown-icon">🚨</div>
 
-    <h1 class="main-title">Emergency Security Lockdown</h1>
+    <h1 class="main-title">{{ __("filament-watchdog-v5::messages.service.emergency.view.main_title") }}</h1>
 
     <p class="subtitle">
-        Our security system has temporarily restricted access to protect your data.
-        We're working to resolve this situation as quickly as possible.
+        {{ __("filament-watchdog-v5::messages.service.emergency.view.subtitle") }}
     </p>
 
     <div class="status-card">
-        <h2 class="status-title">🛡️ Security Measures Active</h2>
+        <h2 class="status-title">{{ __("filament-watchdog-v5::messages.service.emergency.view.status_title") }}</h2>
         <ul class="status-list">
             <li>
                 <span class="status-icon">🔒</span>
-                <span>Site access restricted to authorized administrators</span>
+                <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_1") }}</span>
             </li>
             <li>
                 <span class="status-icon">🧹</span>
-                <span>All user sessions have been cleared</span>
+                <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_2") }}</span>
             </li>
             <li>
                 <span class="status-icon">💾</span>
-                <span>Emergency backup created and secured</span>
+                <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_3") }}</span>
             </li>
             <li>
                 <span class="status-icon">📧</span>
-                <span>Administrators have been notified</span>
+                <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_4") }}</span>
             </li>
             <li>
                 <span class="status-icon">🔍</span>
-                <span>Security analysis in progress</span>
+                <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_5") }}</span>
             </li>
         </ul>
     </div>
 
     <div class="admin-section">
-        <h3 class="admin-title">👨‍💻 Administrator Access</h3>
+        <h3 class="admin-title">{{ __("filament-watchdog-v5::messages.service.emergency.view.admin_title") }}</h3>
         <p class="admin-text">
-            If you are a system administrator, check your email for the emergency access link
-            or use the secret key provided during lockdown activation.
+            {{ __("filament-watchdog-v5::messages.service.emergency.view.admin_text") }}
         </p>
     </div>
 
     <div class="timeline">
-        <p><strong>Lockdown activated:</strong> <span id="lockdown-time"></span></p>
-        <p><strong>Expected resolution:</strong> Within 1-2 hours</p>
+        <p><strong>{{ __("filament-watchdog-v5::messages.service.emergency.view.timeline_activated") }}</strong> <span id="lockdown-time"></span></p>
+        <p><strong>{{ __("filament-watchdog-v5::messages.service.emergency.view.timeline_expected") }}</strong> {{ __("filament-watchdog-v5::messages.service.emergency.view.timeline_resolution") }}</p>
     </div>
 
     <div class="footer">
-        <div class="logo">🐕 FilamentWatchdog</div>
-        <p>Advanced Security Monitoring & Protection</p>
-        <p>For urgent matters, contact your system administrator directly.</p>
+        <div class="logo">{{ __("filament-watchdog-v5::messages.service.emergency.view.logo") }}</div>
+        <p>{{ __("filament-watchdog-v5::messages.service.emergency.view.footer_1") }}</p>
+        <p>{{ __("filament-watchdog-v5::messages.service.emergency.view.footer_2") }}</p>
     </div>
 </div>
 

@@ -32,8 +32,8 @@ public function logActivity(string $eventType, array $details = [], string $risk
     if (in_array($riskLevel, ['high', 'critical'])) {
         $this->alertService->createAlert(
             'suspicious_activity',
-            "Suspicious Activity Detected",
-            "High-risk activity detected: {$eventType}",
+            __('filament-watchdog-v5::messages.service.activity.suspicious_title'),
+            __('filament-watchdog-v5::messages.service.activity.suspicious_body', ['type' => $eventType]),
             $riskLevel,
             ['activity_log_id' => $log->id, 'details' => $details]
         );
@@ -61,8 +61,8 @@ public function logFailedLogin(string $email, string $reason = 'invalid_credenti
     if ($riskLevel === 'high') {
         $this->alertService->createAlert(
             'brute_force_attempt',
-            "Brute Force Attack Detected",
-            "Multiple failed login attempts from IP: {$ipAddress}",
+            __('filament-watchdog-v5::messages.service.activity.brute_force_title'),
+            __('filament-watchdog-v5::messages.service.activity.brute_force_body', ['ip' => $ipAddress]),
             'critical',
             ['ip_address' => $ipAddress, 'attempt_count' => $recentFailures + 1]
         );

@@ -9,22 +9,28 @@ class UpdateSignaturesCommand extends Command
 {
     protected $signature = 'watchdog:update-signatures';
 
-    protected $description = 'Update malware signatures from the remote signatures database';
+    protected $description = null;
+
+    public function __construct()
+    {
+        $this->description = __('filament-watchdog-v5::messages.command.update.description');
+        parent::__construct();
+    }
 
     public function handle(SignatureUpdateService $service): int
     {
-        $this->info('Updating malware signatures...');
+        $this->info(__('filament-watchdog-v5::messages.command.update.updating'));
 
         $result = $service->update();
 
         if ($result['success']) {
-            $this->info("✅ {$result['message']} (version: {$result['version']})");
-            $this->info('Total active signatures: ' . $service->getSignatureCount());
+            $this->info(__('filament-watchdog-v5::messages.command.update.success', ['message' => $result['message'], 'version' => $result['version']]));
+            $this->info(__('filament-watchdog-v5::messages.command.update.total_active', ['count' => $service->getSignatureCount()]));
             return self::SUCCESS;
         }
 
-        $this->error('❌ Signature update failed: ' . $result['message']);
-        $this->warn('Falling back to built-in signatures.');
+        $this->error(__('filament-watchdog-v5::messages.command.update.failed', ['message' => $result['message']]));
+        $this->warn(__('filament-watchdog-v5::messages.command.update.fallback'));
         return self::FAILURE;
     }
 }

@@ -26,7 +26,7 @@ class SignatureUpdateService
 
             if (empty($data['signatures']) || ! is_array($data['signatures'])) {
                 Log::warning('FilamentWatchdog: Invalid signatures format received');
-                return ['success' => false, 'message' => 'Invalid format', 'updated' => 0];
+                return ['success' => false, 'message' => __('filament-watchdog-v5::messages.service.signature.invalid_format'), 'updated' => 0];
             }
 
             $count = $this->storeSignatures($data['signatures'], $data['version'] ?? 'unknown');
@@ -35,7 +35,7 @@ class SignatureUpdateService
 
             return [
                 'success'  => true,
-                'message'  => "Updated {$count} signatures",
+                'message'  => __('filament-watchdog-v5::messages.service.signature.updated', ['count' => $count]),
                 'updated'  => $count,
                 'version'  => $data['version'] ?? 'unknown',
             ];

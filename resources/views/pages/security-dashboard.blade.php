@@ -1,10 +1,10 @@
 <x-filament-panels::page>
     @php
         $statusItems = [
-            ['label' => 'File Monitoring',      'active' => $systemStatus['fileMonitoring']],
-            ['label' => 'Malware Detection',    'active' => $systemStatus['malwareDetection']],
-            ['label' => 'Activity Monitoring',  'active' => $systemStatus['activityMonitoring']],
-            ['label' => 'Alert System',         'active' => $systemStatus['alertSystem']],
+            ['label' => __('filament-watchdog-v5::messages.page.dashboard.status.file_monitoring'),      'active' => $systemStatus['fileMonitoring']],
+            ['label' => __('filament-watchdog-v5::messages.page.dashboard.status.malware_detection'),    'active' => $systemStatus['malwareDetection']],
+            ['label' => __('filament-watchdog-v5::messages.page.dashboard.status.activity_monitoring'),  'active' => $systemStatus['activityMonitoring']],
+            ['label' => __('filament-watchdog-v5::messages.page.dashboard.status.alert_system'),         'active' => $systemStatus['alertSystem']],
         ];
     @endphp
 
@@ -12,7 +12,7 @@
 
         {{-- System Status --}}
         <x-filament::section>
-            <x-slot name="heading">System Status</x-slot>
+            <x-slot name="heading">{{ __('filament-watchdog-v5::messages.page.dashboard.sections.system_status') }}</x-slot>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
                 @foreach($statusItems as $item)
@@ -31,7 +31,7 @@
                         <div>
                             <div style="font-size:0.875rem;font-weight:500">{{ $item['label'] }}</div>
                             <div style="font-size:0.875rem;color:{{ $item['active'] ? '#16a34a' : '#dc2626' }}">
-                                {{ $item['active'] ? 'Active' : 'Disabled' }}
+                                {{ $item['active'] ? __('filament-watchdog-v5::messages.page.dashboard.status.active') : __('filament-watchdog-v5::messages.page.dashboard.status.disabled') }}
                             </div>
                         </div>
                     </div>
@@ -41,14 +41,14 @@
 
         {{-- System Statistics --}}
         <x-filament::section>
-            <x-slot name="heading">System Statistics</x-slot>
+            <x-slot name="heading">{{ __('filament-watchdog-v5::messages.page.dashboard.sections.system_statistics') }}</x-slot>
 
             <div style="display:flex;flex-direction:column;gap:1rem">
                 @foreach([
-                    ['label' => 'Total Files Monitored', 'value' => $stats['totalFiles'],        'warn' => false],
-                    ['label' => 'Modified Files',        'value' => $stats['modifiedFiles'],      'warn' => $stats['modifiedFiles'] > 0],
-                    ['label' => 'Malware Detected',      'value' => $stats['malwareDetections'],  'warn' => $stats['malwareDetections'] > 0],
-                    ['label' => 'Unresolved Alerts',     'value' => $stats['unresolvedAlerts'],   'warn' => $stats['unresolvedAlerts'] > 0],
+                    ['label' => __('filament-watchdog-v5::messages.page.dashboard.stats.total_monitored'), 'value' => $stats['totalFiles'],        'warn' => false],
+                    ['label' => __('filament-watchdog-v5::messages.page.dashboard.stats.modified_files'),  'value' => $stats['modifiedFiles'],      'warn' => $stats['modifiedFiles'] > 0],
+                    ['label' => __('filament-watchdog-v5::messages.page.dashboard.stats.malware_detected'),'value' => $stats['malwareDetections'],  'warn' => $stats['malwareDetections'] > 0],
+                    ['label' => __('filament-watchdog-v5::messages.page.dashboard.stats.unresolved_alerts'),'value' => $stats['unresolvedAlerts'],  'warn' => $stats['unresolvedAlerts'] > 0],
                 ] as $stat)
                     <div style="display:flex;justify-content:space-between;align-items:center">
                         <span style="font-size:0.875rem;color:#6b7280">{{ $stat['label'] }}</span>

@@ -11,12 +11,18 @@ use MKWebDesign\FilamentWatchdog\Models\ActivityLog;
 class DebugCommand extends Command
 {
     protected $signature = 'watchdog:debug {--stats : Show database statistics} {--config : Show configuration} {--recent : Show recent activity}';
-    protected $description = 'Debug FilamentWatchdog system';
+    protected $description = null;
+
+    public function __construct()
+    {
+        $this->description = __('filament-watchdog-v5::messages.command.debug.description');
+        parent::__construct();
+    }
 
     public function handle(): int
     {
-        $this->info('🔍 FilamentWatchdog Debug Information');
-        $this->info('=====================================');
+        $this->info(__('filament-watchdog-v5::messages.command.debug.info_title'));
+        $this->info(__('filament-watchdog-v5::messages.command.debug.info_divider'));
 
         if ($this->option('stats') || (!$this->option('config') && !$this->option('recent'))) {
             $this->showStats();
@@ -35,15 +41,15 @@ class DebugCommand extends Command
 
     private function showStats(): void
     {
-        $this->info('📊 Database Statistics');
-        $this->info('=====================');
+        $this->info(__('filament-watchdog-v5::messages.command.debug.stats_title'));
+        $this->info(__('filament-watchdog-v5::messages.command.debug.stats_divider'));
 
         $fileStats = [
-            'Total Files' => FileIntegrityCheck::count(),
-            'Clean Files' => FileIntegrityCheck::where('status', 'clean')->count(),
-            'New Files' => FileIntegrityCheck::where('status', 'new')->count(),
-            'Modified Files' => FileIntegrityCheck::where('status', 'modified')->count(),
-            'Deleted Files' => FileIntegrityCheck::where('status', 'deleted')->count(),
+            __('filament-watchdog-v5::messages.command.debug.total_files') => FileIntegrityCheck::count(),
+            __('filament-watchdog-v5::messages.command.debug.clean_files') => FileIntegrityCheck::where('status', 'clean')->count(),
+            __('filament-watchdog-v5::messages.command.debug.new_files') => FileIntegrityCheck::where('status', 'new')->count(),
+            __('filament-watchdog-v5::messages.command.debug.modified_files') => FileIntegrityCheck::where('status', 'modified')->count(),
+            __('filament-watchdog-v5::messages.command.debug.deleted_files') => FileIntegrityCheck::where('status', 'deleted')->count(),
         ];
 
         foreach ($fileStats as $label => $count) {
@@ -53,11 +59,11 @@ class DebugCommand extends Command
         $this->newLine();
 
         $securityStats = [
-            'Total Alerts' => SecurityAlert::count(),
-            'New Alerts' => SecurityAlert::where('status', 'new')->count(),
-            'Critical Alerts' => SecurityAlert::where('severity', 'critical')->count(),
-            'Malware Detections' => MalwareDetection::count(),
-            'Activity Logs' => ActivityLog::count(),
+            __('filament-watchdog-v5::messages.command.debug.total_alerts') => SecurityAlert::count(),
+            __('filament-watchdog-v5::messages.command.debug.new_alerts') => SecurityAlert::where('status', 'new')->count(),
+            __('filament-watchdog-v5::messages.command.debug.critical_alerts') => SecurityAlert::where('severity', 'critical')->count(),
+            __('filament-watchdog-v5::messages.command.debug.malware_detections') => MalwareDetection::count(),
+            __('filament-watchdog-v5::messages.command.debug.activity_logs') => ActivityLog::count(),
         ];
 
         foreach ($securityStats as $label => $count) {
@@ -69,17 +75,17 @@ class DebugCommand extends Command
 
     private function showConfig(): void
     {
-        $this->info('⚙️ Configuration');
-        $this->info('================');
+        $this->info(__('filament-watchdog-v5::messages.command.debug.config_title'));
+        $this->info(__('filament-watchdog-v5::messages.command.debug.config_divider'));
 
         $config = [
-            'Monitoring Enabled' => config('filament-watchdog.monitoring.enabled') ? 'Yes' : 'No',
-            'Malware Detection' => config('filament-watchdog.malware_detection.enabled') ? 'Yes' : 'No',
-            'Activity Monitoring' => config('filament-watchdog.activity_monitoring.enabled') ? 'Yes' : 'No',
-            'Alerts Enabled' => config('filament-watchdog.alerts.enabled') ? 'Yes' : 'No',
-            'Scan Interval' => config('filament-watchdog.monitoring.scan_interval') . ' seconds',
-            'Hash Algorithm' => config('filament-watchdog.file_integrity.hash_algorithm'),
-            'Max File Size' => number_format(config('filament-watchdog.file_integrity.max_file_size') / 1024 / 1024, 2) . ' MB',
+            __('filament-watchdog-v5::messages.command.debug.monitoring_enabled') => config('filament-watchdog.monitoring.enabled') ? __('filament-watchdog-v5::messages.command.debug.yes') : __('filament-watchdog-v5::messages.command.debug.no'),
+            __('filament-watchdog-v5::messages.command.debug.malware_enabled') => config('filament-watchdog.malware_detection.enabled') ? __('filament-watchdog-v5::messages.command.debug.yes') : __('filament-watchdog-v5::messages.command.debug.no'),
+            __('filament-watchdog-v5::messages.command.debug.activity_enabled') => config('filament-watchdog.activity_monitoring.enabled') ? __('filament-watchdog-v5::messages.command.debug.yes') : __('filament-watchdog-v5::messages.command.debug.no'),
+            __('filament-watchdog-v5::messages.command.debug.alerts_enabled') => config('filament-watchdog.alerts.enabled') ? __('filament-watchdog-v5::messages.command.debug.yes') : __('filament-watchdog-v5::messages.command.debug.no'),
+            __('filament-watchdog-v5::messages.command.debug.scan_interval') => config('filament-watchdog.monitoring.scan_interval') . ' ' . __('filament-watchdog-v5::messages.command.debug.seconds'),
+            __('filament-watchdog-v5::messages.command.debug.hash_algorithm') => config('filament-watchdog.file_integrity.hash_algorithm'),
+            __('filament-watchdog-v5::messages.command.debug.max_file_size') => number_format(config('filament-watchdog.file_integrity.max_file_size') / 1024 / 1024, 2) . ' ' . __('filament-watchdog-v5::messages.command.debug.mb'),
         ];
 
         foreach ($config as $label => $value) {
@@ -87,14 +93,14 @@ class DebugCommand extends Command
         }
 
         $this->newLine();
-        $this->info('📁 Monitored Paths:');
+        $this->info(__('filament-watchdog-v5::messages.command.debug.monitored_paths'));
         $paths = config('filament-watchdog.monitoring.monitored_paths', []);
         foreach ($paths as $path) {
             $this->line('  - ' . $path);
         }
 
         $this->newLine();
-        $this->info('🚫 Excluded Paths:');
+        $this->info(__('filament-watchdog-v5::messages.command.debug.excluded_paths'));
         $excluded = config('filament-watchdog.monitoring.excluded_paths', []);
         foreach ($excluded as $path) {
             $this->line('  - ' . $path);
@@ -105,10 +111,10 @@ class DebugCommand extends Command
 
     private function showRecent(): void
     {
-        $this->info('🕐 Recent Activity (Last 24 hours)');
-        $this->info('==================================');
+        $this->info(__('filament-watchdog-v5::messages.command.debug.recent_activity'));
+        $this->info(__('filament-watchdog-v5::messages.command.debug.recent_activity_divider'));
 
-        $this->info('📁 Recent File Changes:');
+        $this->info(__('filament-watchdog-v5::messages.command.debug.recent_file_changes'));
         $recentFiles = FileIntegrityCheck::where('updated_at', '>=', now()->subDay())
             ->whereIn('status', ['new', 'modified'])
             ->orderBy('updated_at', 'desc')
@@ -125,11 +131,11 @@ class DebugCommand extends Command
                 ));
             }
         } else {
-            $this->line('  No recent file changes');
+            $this->line(__('filament-watchdog-v5::messages.command.debug.no_recent_changes'));
         }
 
         $this->newLine();
-        $this->info('🚨 Recent Alerts:');
+        $this->info(__('filament-watchdog-v5::messages.command.debug.recent_alerts'));
         $recentAlerts = SecurityAlert::where('created_at', '>=', now()->subDay())
             ->orderBy('created_at', 'desc')
             ->limit(10)
@@ -145,11 +151,11 @@ class DebugCommand extends Command
                 ));
             }
         } else {
-            $this->line('  No recent alerts');
+            $this->line(__('filament-watchdog-v5::messages.command.debug.no_recent_alerts'));
         }
 
         $this->newLine();
-        $this->info('🦠 Recent Malware Detections:');
+        $this->info(__('filament-watchdog-v5::messages.command.debug.recent_malware'));
         $recentMalware = MalwareDetection::where('created_at', '>=', now()->subDay())
             ->orderBy('created_at', 'desc')
             ->limit(10)
@@ -166,7 +172,7 @@ class DebugCommand extends Command
                 ));
             }
         } else {
-            $this->line('  No recent malware detections');
+            $this->line(__('filament-watchdog-v5::messages.command.debug.no_recent_malware'));
         }
 
         $this->newLine();

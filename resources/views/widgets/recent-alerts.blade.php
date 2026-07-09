@@ -1,7 +1,7 @@
 <x-filament-widgets::widget>
     <x-filament::section>
         <x-slot name="heading">
-            Recent Security Alerts
+            {{ __('filament-watchdog-v5::messages.widget.recent_alerts.title') }}
         </x-slot>
 
         <div class="space-y-2 max-h-96 overflow-y-auto">
@@ -27,7 +27,7 @@
                             @elseif($alert['severity'] === 'medium') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
                             @else bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                             @endif">
-                            {{ ucfirst($alert['severity']) }}
+                            {{ __('filament-watchdog-v5::messages.risk_level.' . $alert['severity']) }}
                         </span>
                         <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full
                             @if($alert['status'] === 'new') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
@@ -35,7 +35,7 @@
                             @elseif($alert['status'] === 'resolved') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                             @else bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
                             @endif">
-                            {{ ucfirst($alert['status']) }}
+                            {{ __('filament-watchdog-v5::messages.alert_status.' . $alert['status']) }}
                         </span>
                     </div>
                 </div>
@@ -45,8 +45,8 @@
                         <svg style="width:3rem;height:3rem;margin:0 auto 0.75rem;display:block" stroke="#9ca3af" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">No security alerts</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">Your system is secure</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('filament-watchdog-v5::messages.widget.recent_alerts.no_alerts') }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">{{ __('filament-watchdog-v5::messages.widget.recent_alerts.system_secure') }}</div>
                     </div>
                 </div>
             @endforelse

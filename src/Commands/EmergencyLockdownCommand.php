@@ -18,14 +18,20 @@ class EmergencyLockdownCommand extends Command
                             {--emergency-backup=1 : Create emergency backup (1 or 0)}
                             {--force : Skip confirmation}';
 
-    protected $description = 'Activate or deactivate emergency security lockdown';
+    protected $description = null;
+
+    public function __construct()
+    {
+        $this->description = __('filament-watchdog-v5::messages.command.emergency.description');
+        parent::__construct();
+    }
 
     public function handle(EmergencyLockdownService $lockdownService): int
     {
         $action = $this->argument('action');
 
         if (!in_array($action, ['activate', 'deactivate'])) {
-        $this->error('Action must be either \"activate\" or \"deactivate\"');
+        $this->error(__('filament-watchdog-v5::messages.command.emergency.action_error'));
             return 1;
         }
 
@@ -39,23 +45,23 @@ class EmergencyLockdownCommand extends Command
     private function activateLockdown(EmergencyLockdownService $lockdownService): int
     {
         if ($lockdownService->isLockdownActive()) {
-            $this->warn('⚠️  Emergency lockdown is already active!');
+            $this->warn(__('filament-watchdog-v5::messages.command.emergency.already_active'));
             
             $status = $lockdownService->getLockdownStatus();
             if ($status) {
-                $this->info('Lockdown ID: ' . $status['lockdown_id']);
-                $this->info('Activated by: ' . $status['activated_by']);
-                $this->info('Activated at: ' . $status['activated_at']->format('Y-m-d H:i:s'));
+                $this->info(__('filament-watchdog-v5::messages.command.emergency.lockdown_id', ['id' => $status['lockdown_id']]));
+                $this->info(__('filament-watchdog-v5::messages.command.emergency.activated_by', ['by' => $status['activated_by']]));
+                $this->info(__('filament-watchdog-v5::messages.command.emergency.activated_at', ['at' => $status['activated_at']->format('Y-m-d H:i:s')]));
             }
             
             return 0;
         }
 
-        $this->warn('🚨 WARNING: This will activate EMERGENCY LOCKDOWN!');
-        $this->warn('This will block access to the entire website except for admins.');
+        $this->warn(__('filament-watchdog-v5::messages.command.emergency.warning'));
+        $this->warn(__('filament-watchdog-v5::messages.command.emergency.warning_desc'));
 
-        if (!$this->option('force') && !$this->confirm('Do you want to continue?')) {
-        $this->info('Emergency lockdown cancelled.');
+        if (!$this->option('force') && !$this->confirm(__('filament-watchdog-v5::messages.command.emergency.confirm_activate'))) {
+        $this->info(__('filament-watchdog-v5::messages.command.emergency.activate_cancelled'));
             return 0;
         }
 
@@ -69,27 +75,27 @@ class EmergencyLockdownCommand extends Command
             'emergency_backup' => (bool) $this->option('emergency-backup'),
         ];
 
-        $this->info('🔒 Activating emergency lockdown...');
+        $this->info(__('filament-watchdog-v5::messages.command.emergency.activating'));
 
         $results = $lockdownService->activateEmergencyLockdown($options);
 
         if ($results['status'] === 'success') {
-        $this->info('✅ Emergency lockdown activated successfully!');
-            $this->info('Alert ID: ' . $results['alert_id']);
+        $this->info(__('filament-watchdog-v5::messages.command.emergency.activate_success'));
+            $this->info(__('filament-watchdog-v5::messages.command.emergency.alert_id', ['id' => $results['alert_id']]));
             
             if (isset($results['blocked_ips']) && count($results['blocked_ips']) > 0) {
-            $this->info('Blocked IPs: ' . implode(', ', $results['blocked_ips']));
+            $this->info(__('filament-watchdog-v5::messages.command.emergency.blocked_ips', ['ips' => implode(', ', $results['blocked_ips'])]));
             }
             
             $accessUrl = $lockdownService->getEmergencyAccessUrl();
             if ($accessUrl) {
-                $this->warn('🔑 Emergency access URL: ' . $accessUrl);
-                $this->warn('Save this URL to access the system during lockdown!');
+                $this->warn(__('filament-watchdog-v5::messages.command.emergency.access_url', ['url' => $accessUrl]));
+                $this->warn(__('filament-watchdog-v5::messages.command.emergency.access_url_desc'));
             }
             
             return 0;
         } else {
-        $this->error('❌ Failed to activate emergency lockdown: ' . ($results['error'] ?? 'Unknown error'));
+        $this->error(__('filament-watchdog-v5::messages.command.emergency.activate_failed', ['error' => $results['error'] ?? 'Unknown error']));
             return 1;
         }
     }
@@ -97,27 +103,27 @@ class EmergencyLockdownCommand extends Command
     private function deactivateLockdown(EmergencyLockdownService $lockdownService): int
     {
         if (!$lockdownService->isLockdownActive()) {
-            $this->warn('⚠️  No emergency lockdown is currently active.');
+            $this->warn(__('filament-watchdog-v5::messages.command.emergency.not_active'));
             return 0;
         }
 
-        $this->info('🔓 Deactivating emergency lockdown...');
+        $this->info(__('filament-watchdog-v5::messages.command.emergency.deactivating'));
 
-        if (!$this->option('force') && !$this->confirm('Do you want to deactivate the emergency lockdown?')) {
-        $this->info('Deactivation cancelled.');
+        if (!$this->option('force') && !$this->confirm(__('filament-watchdog-v5::messages.command.emergency.confirm_deactivate'))) {
+        $this->info(__('filament-watchdog-v5::messages.command.emergency.deactivate_cancelled'));
             return 0;
         }
 
         $results = $lockdownService->deactivateEmergencyLockdown();
 
         if ($results['status'] === 'success') {
-        $this->info('✅ Emergency lockdown deactivated successfully!');
-            $this->info('Maintenance mode disabled: ' . ($results['maintenance_disabled'] ? 'Yes' : 'No'));
-            $this->info('Users restored: ' . ($results['users_restored'] ?? 0));
-            $this->info('Normal operations resumed.');
+        $this->info(__('filament-watchdog-v5::messages.command.emergency.deactivate_success'));
+            $this->info(__('filament-watchdog-v5::messages.command.emergency.maintenance_disabled', ['status' => $results['maintenance_disabled'] ? __('filament-watchdog-v5::messages.command.debug.yes') : __('filament-watchdog-v5::messages.command.debug.no')]));
+            $this->info(__('filament-watchdog-v5::messages.command.emergency.users_restored', ['count' => $results['users_restored'] ?? 0]));
+            $this->info(__('filament-watchdog-v5::messages.command.emergency.normal_operations'));
             return 0;
         } else {
-        $this->error('❌ Failed to deactivate emergency lockdown: ' . ($results['error'] ?? 'Unknown error'));
+        $this->error(__('filament-watchdog-v5::messages.command.emergency.deactivate_failed', ['error' => $results['error'] ?? 'Unknown error']));
             return 1;
         }
     }

@@ -111,7 +111,7 @@ trait ConfiguresWatchdogNavigation
             return null;
         }
 
-        return 'Security';
+        return __('filament-watchdog-v5::messages.navigation.group');
     }
 
     /**
