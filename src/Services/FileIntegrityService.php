@@ -3,6 +3,7 @@
 namespace MKWebDesign\FilamentWatchdog\Services;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use MKWebDesign\FilamentWatchdog\Models\FileIntegrityCheck;
 use MKWebDesign\FilamentWatchdog\Models\SecurityAlert;
 
@@ -80,7 +81,7 @@ class FileIntegrityService
             }
         } catch (\Exception $e) {
             // Log error but continue
-            \Log::error('FilamentWatchdog: Error scanning path ' . $path . ': ' . $e->getMessage());
+            Log::error('FilamentWatchdog: Error scanning path ' . $path . ': ' . $e->getMessage());
         }
 
         return $changes;
@@ -126,8 +127,8 @@ class FileIntegrityService
 
             $this->alertService->createAlert(
                 'new_file_detected',
-                'New File Detected: ' . basename($relativePath),
-                'A new file has been detected: ' . $relativePath,
+                __('filament-watchdog-v5::messages.service.file_integrity.new_file_title', ['file' => basename($relativePath)]),
+                __('filament-watchdog-v5::messages.service.file_integrity.new_file_body', ['path' => $relativePath]),
                 'medium',
                 [
                     'file_path' => $relativePath,
@@ -167,8 +168,8 @@ class FileIntegrityService
 
             $this->alertService->createAlert(
                 'file_modified',
-                'File Modified: ' . basename($relativePath),
-                'The file ' . $relativePath . ' has been modified.',
+                __('filament-watchdog-v5::messages.service.file_integrity.modified_title', ['file' => basename($relativePath)]),
+                __('filament-watchdog-v5::messages.service.file_integrity.modified_body', ['path' => $relativePath]),
                 'medium',
                 ['file_path' => $relativePath, 'changes' => $changes]
             );
@@ -208,8 +209,8 @@ class FileIntegrityService
         if (File::move($filePath, $quarantineFile)) {
             $this->alertService->createAlert(
                 'file_quarantined',
-                'File Quarantined: ' . $fileName,
-                'The file ' . $filePath . ' has been quarantined to ' . $quarantineFile . '.',
+                __('filament-watchdog-v5::messages.service.file_integrity.quarantined_title', ['file' => $fileName]),
+                __('filament-watchdog-v5::messages.service.file_integrity.quarantined_body', ['path' => $filePath, 'quarantine' => $quarantineFile]),
                 'high',
                 ['original_path' => $filePath, 'quarantine_path' => $quarantineFile]
             );

@@ -29,21 +29,21 @@ class ThreatLevelWidget extends Widget
 
         // Determine threat level
         if ($criticalAlerts > 0 || $recentMalware > 0) {
-            $threatLevel = 'CRITICAL';
+            $threatLevel = __('filament-watchdog-v5::messages.widget.threat_level.critical.level');
             $color = 'red';
-            $description = 'Immediate action required';
+            $description = __('filament-watchdog-v5::messages.widget.threat_level.critical.desc');
         } elseif ($highAlerts > 0) {
-            $threatLevel = 'HIGH';
+            $threatLevel = __('filament-watchdog-v5::messages.widget.threat_level.high.level');
             $color = 'orange';
-            $description = 'Monitor system closely';
+            $description = __('filament-watchdog-v5::messages.widget.threat_level.high.desc');
         } elseif ($highAlerts > 0 || SecurityAlert::where('status', 'new')->count() > 0) {
-            $threatLevel = 'MEDIUM';
+            $threatLevel = __('filament-watchdog-v5::messages.widget.threat_level.medium.level');
             $color = 'yellow';
-            $description = 'Some alerts require attention';
+            $description = __('filament-watchdog-v5::messages.widget.threat_level.medium.desc');
         } else {
-            $threatLevel = 'LOW';
+            $threatLevel = __('filament-watchdog-v5::messages.widget.threat_level.low.level');
             $color = 'green';
-            $description = 'All systems operating normally';
+            $description = __('filament-watchdog-v5::messages.widget.threat_level.low.desc');
         }
 
         return [

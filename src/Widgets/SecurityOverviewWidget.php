@@ -55,38 +55,38 @@ class SecurityOverviewWidget extends BaseWidget
         }
 
         return [
-            Stat::make('Unresolved Alerts', $unresolvedAlerts)
-                ->description('Total unresolved security alerts')
+            Stat::make(__('filament-watchdog-v5::messages.widget.overview.unresolved.title'), $unresolvedAlerts)
+                ->description(__('filament-watchdog-v5::messages.widget.overview.unresolved.desc'))
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color($unresolvedAlerts > 0 ? 'warning' : 'success')
                 ->chart($unresolvedAlerts > 0 ? [1, 3, 2, 4, 3, 2, 1] : [0, 0, 0, 0, 0, 0, 0]),
 
-            Stat::make('Critical Alerts', $criticalAlerts)
-                ->description('High priority security issues')
+            Stat::make(__('filament-watchdog-v5::messages.widget.overview.critical.title'), $criticalAlerts)
+                ->description(__('filament-watchdog-v5::messages.widget.overview.critical.desc'))
                 ->descriptionIcon('heroicon-m-fire')
                 ->color($criticalAlerts > 0 ? 'danger' : 'success')
                 ->chart($criticalAlerts > 0 ? [3, 5, 4, 6, 5, 4, 3] : [0, 0, 0, 0, 0, 0, 0]),
 
-            Stat::make('Recent Activity', $recentAlerts)
-                ->description('Alerts in last hour')
+            Stat::make(__('filament-watchdog-v5::messages.widget.overview.recent.title'), $recentAlerts)
+                ->description(__('filament-watchdog-v5::messages.widget.overview.recent.desc'))
                 ->descriptionIcon('heroicon-m-clock')
                 ->color($recentAlerts > 0 ? 'info' : 'success')
                 ->chart($recentAlerts > 0 ? [2, 4, 3, 5, 4, 3, 2] : [0, 0, 0, 0, 0, 0, 0]),
 
-            Stat::make('File Changes', $recentFileChanges)
-                ->description('Modified files (24h)')
+            Stat::make(__('filament-watchdog-v5::messages.widget.overview.files.title'), $recentFileChanges)
+                ->description(__('filament-watchdog-v5::messages.widget.overview.files.desc'))
                 ->descriptionIcon('heroicon-m-document-text')
                 ->color($recentFileChanges > 5 ? 'warning' : 'success')
                 ->chart($recentFileChanges > 0 ? [1, 2, 3, 2, 1, 2, 1] : [0, 0, 0, 0, 0, 0, 0]),
 
-            Stat::make('Malware Detected', $recentMalware)
-                ->description('Threats found (24h)')
+            Stat::make(__('filament-watchdog-v5::messages.widget.overview.malware.title'), $recentMalware)
+                ->description(__('filament-watchdog-v5::messages.widget.overview.malware.desc'))
                 ->descriptionIcon('heroicon-m-bug-ant')
                 ->color($recentMalware > 0 ? 'danger' : 'success')
                 ->chart($recentMalware > 0 ? [4, 6, 5, 7, 6, 5, 4] : [0, 0, 0, 0, 0, 0, 0]),
 
-            Stat::make('High Risk Activity', $recentHighRiskActivity)
-                ->description('Suspicious events (24h)')
+            Stat::make(__('filament-watchdog-v5::messages.widget.overview.high_risk.title'), $recentHighRiskActivity)
+                ->description(__('filament-watchdog-v5::messages.widget.overview.high_risk.desc'))
                 ->descriptionIcon('heroicon-m-eye-slash')
                 ->color($recentHighRiskActivity > 0 ? 'danger' : 'success')
                 ->chart($recentHighRiskActivity > 0 ? [2, 3, 4, 3, 2, 3, 2] : [0, 0, 0, 0, 0, 0, 0]),

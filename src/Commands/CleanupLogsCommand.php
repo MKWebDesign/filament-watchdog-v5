@@ -11,7 +11,13 @@ use MKWebDesign\FilamentWatchdog\Models\SecurityAlert;
 class CleanupLogsCommand extends Command
 {
     protected $signature = 'watchdog:cleanup {--days=30 : Number of days to keep logs} {--force : Force cleanup without confirmation}';
-    protected $description = 'Clean up old logs and maintain database performance';
+    protected $description = null;
+
+    public function __construct()
+    {
+        $this->description = __('filament-watchdog-v5::messages.command.cleanup.description');
+        parent::__construct();
+    }
 
     public function handle(): int
     {
@@ -19,11 +25,11 @@ class CleanupLogsCommand extends Command
         $retentionDays = $days ?: config('filament-watchdog.database.log_retention_days', 30);
         $cutoffDate = now()->subDays($retentionDays);
 
-        $this->info('🧹 Cleaning up FilamentWatchdog logs older than ' . $retentionDays . ' days...');
+        $this->info(__('filament-watchdog-v5::messages.command.cleanup.cleaning_up', ['days' => $retentionDays]));
 
         if (!$this->option('force')) {
-            if (!$this->confirm('This will permanently delete old security logs. Continue?')) {
-                $this->info('Cleanup cancelled.');
+            if (!$this->confirm(__('filament-watchdog-v5::messages.command.cleanup.confirm'))) {
+                $this->info(__('filament-watchdog-v5::messages.command.cleanup.cancelled'));
                 return 0;
             }
         }
@@ -40,15 +46,15 @@ class CleanupLogsCommand extends Command
                 ->where('status', 'resolved') // Only delete resolved alerts
                 ->delete();
 
-            $this->info('✅ Cleanup completed:');
-            $this->line('  - Activity logs: ' . $deletedActivity . ' deleted');
-            $this->line('  - File integrity checks: ' . $deletedIntegrity . ' deleted');
-            $this->line('  - Malware detections: ' . $deletedMalware . ' deleted');
-            $this->line('  - Security alerts: ' . $deletedAlerts . ' deleted');
+            $this->info(__('filament-watchdog-v5::messages.command.cleanup.completed'));
+            $this->line(__('filament-watchdog-v5::messages.command.cleanup.activity_logs', ['count' => $deletedActivity]));
+            $this->line(__('filament-watchdog-v5::messages.command.cleanup.integrity_checks', ['count' => $deletedIntegrity]));
+            $this->line(__('filament-watchdog-v5::messages.command.cleanup.malware_detections', ['count' => $deletedMalware]));
+            $this->line(__('filament-watchdog-v5::messages.command.cleanup.security_alerts', ['count' => $deletedAlerts]));
 
             return 0;
         } catch (\Exception $e) {
-            $this->error('❌ Cleanup failed: ' . $e->getMessage());
+            $this->error(__('filament-watchdog-v5::messages.command.cleanup.failed', ['error' => $e->getMessage()]));
             return 1;
         }
     }

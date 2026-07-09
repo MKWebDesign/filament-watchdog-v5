@@ -4,32 +4,38 @@ namespace MKWebDesign\FilamentWatchdog\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use MKWebDesign\FilamentWatchdog\Services\FileIntegrityService;
-use MKWebDesign\FilamentWatchdog\Services\MalwareDetectionService;
-use MKWebDesign\FilamentWatchdog\Services\AlertService;
 use MKWebDesign\FilamentWatchdog\Models\FileIntegrityCheck;
 use MKWebDesign\FilamentWatchdog\Models\MalwareDetection;
+use MKWebDesign\FilamentWatchdog\Services\AlertService;
 
 class ScanFilesCommand extends Command
 {
     protected $signature = 'watchdog:scan {--baseline : Create baseline instead of scanning for changes} {--force : Force scan even if disabled} {--debug : Show detailed debug output}';
-    protected $description = 'Scan files for integrity changes and malware';
+
+    protected $description = null;
+
+    public function __construct()
+    {
+        $this->description = __('filament-watchdog-v5::messages.command.scan.description');
+        parent::__construct();
+    }
 
     public function handle(): int
     {
-        if (!config('filament-watchdog.monitoring.enabled') && !$this->option('force')) {
-            $this->warn('File monitoring is disabled in configuration.');
+        if (! config('filament-watchdog.monitoring.enabled') && ! $this->option('force')) {
+            $this->warn(__('filament-watchdog-v5::messages.command.scan.disabled'));
+
             return 1;
         }
 
         $isBaseline = $this->option('baseline');
         $debug = $this->option('debug');
 
-        $this->info('🔍 Starting FilamentWatchdog security scan...');
+        $this->info(__('filament-watchdog-v5::messages.command.scan.starting'));
 
         if ($debug) {
-            $this->info('Debug mode enabled');
-            $this->info('Baseline mode: ' . ($isBaseline ? 'YES' : 'NO'));
+            $this->info(__('filament-watchdog-v5::messages.command.scan.debug_enabled'));
+            $this->info(__('filament-watchdog-v5::messages.command.scan.baseline_mode', ['status' => ($isBaseline ? __('filament-watchdog-v5::messages.command.debug.yes') : __('filament-watchdog-v5::messages.command.debug.no'))]));
         }
 
         try {
@@ -41,42 +47,45 @@ class ScanFilesCommand extends Command
                 $this->scanForMalware($debug);
             }
 
-            $this->info('✅ Security scan completed successfully.');
+            $this->info(__('filament-watchdog-v5::messages.command.scan.success'));
+
             return 0;
         } catch (\Exception $e) {
-            $this->error('❌ Scan failed: ' . $e->getMessage());
+            $this->error(__('filament-watchdog-v5::messages.command.scan.failed', ['error' => $e->getMessage()]));
             if ($debug) {
-                $this->error('Stack trace: ' . $e->getTraceAsString());
+                $this->error(__('filament-watchdog-v5::messages.command.scan.stack_trace', ['trace' => $e->getTraceAsString()]));
             }
+
             return 1;
         }
     }
 
     private function createBaseline(bool $debug = false): void
     {
-        $this->info('📊 Creating file integrity baseline...');
+        $this->info(__('filament-watchdog-v5::messages.command.scan.creating_baseline'));
 
         $paths = config('filament-watchdog.monitoring.monitored_paths', []);
         $excluded = config('filament-watchdog.monitoring.excluded_paths', []);
 
         if ($debug) {
-            $this->info('Monitored paths: ' . implode(', ', $paths));
-            $this->info('Excluded paths: ' . implode(', ', $excluded));
+            $this->info(__('filament-watchdog-v5::messages.command.scan.monitored_paths', ['paths' => implode(', ', $paths)]));
+            $this->info(__('filament-watchdog-v5::messages.command.scan.excluded_paths', ['paths' => implode(', ', $excluded)]));
         }
 
         $totalFiles = 0;
 
         foreach ($paths as $path) {
             $fullPath = base_path($path);
-            if (!File::exists($fullPath)) {
+            if (! File::exists($fullPath)) {
                 if ($debug) {
-                    $this->warn('Path not found: ' . $fullPath);
+                    $this->warn(__('filament-watchdog-v5::messages.command.scan.path_not_found', ['path' => $fullPath]));
                 }
+
                 continue;
             }
 
             $files = $this->getFilesInPath($fullPath, $excluded, $debug);
-            $this->info('Processing ' . count($files) . ' files in ' . $path);
+            $this->info(__('filament-watchdog-v5::messages.command.scan.processing_files', ['count' => count($files), 'path' => $path]));
 
             if (count($files) > 0) {
                 $bar = $this->output->createProgressBar(count($files));
@@ -93,12 +102,12 @@ class ScanFilesCommand extends Command
             }
         }
 
-        $this->info('✅ Baseline created for ' . $totalFiles . ' files.');
+        $this->info(__('filament-watchdog-v5::messages.command.scan.baseline_created', ['count' => $totalFiles]));
     }
 
     private function scanForChanges(bool $debug = false): void
     {
-        $this->info('🔍 Scanning for file changes...');
+        $this->info(__('filament-watchdog-v5::messages.command.scan.scanning_changes'));
 
         $changes = [];
         $paths = config('filament-watchdog.monitoring.monitored_paths', []);
@@ -106,14 +115,14 @@ class ScanFilesCommand extends Command
 
         foreach ($paths as $path) {
             $fullPath = base_path($path);
-            if (!File::exists($fullPath)) {
+            if (! File::exists($fullPath)) {
                 continue;
             }
 
             $files = $this->getFilesInPath($fullPath, $excluded, $debug);
 
             if ($debug) {
-                $this->info('Checking ' . count($files) . ' files in ' . $path);
+                $this->info(__('filament-watchdog-v5::messages.command.scan.checking_files', ['count' => count($files), 'path' => $path]));
             }
 
             foreach ($files as $file) {
@@ -125,18 +134,18 @@ class ScanFilesCommand extends Command
         }
 
         if (count($changes) > 0) {
-            $this->warn('⚠️  Found ' . count($changes) . ' file changes:');
+            $this->warn(__('filament-watchdog-v5::messages.command.scan.found_changes', ['count' => count($changes)]));
             foreach ($changes as $change) {
-                $this->line('  - ' . $change['status'] . ': ' . $change['path']);
+                $this->line('  - '.$change['status'].': '.$change['path']);
             }
         } else {
-            $this->info('✅ No file changes detected.');
+            $this->info(__('filament-watchdog-v5::messages.command.scan.no_changes'));
         }
     }
 
     private function scanForDeletedFiles(bool $debug = false): void
     {
-        $this->info('🗑️  Scanning for deleted files...');
+        $this->info(__('filament-watchdog-v5::messages.command.scan.scanning_deleted'));
 
         $deletedFiles = [];
         $paths = config('filament-watchdog.monitoring.monitored_paths', []);
@@ -162,14 +171,14 @@ class ScanFilesCommand extends Command
                 }
             }
 
-            if (!$isInMonitoredPath) {
+            if (! $isInMonitoredPath) {
                 continue;
             }
 
             // Check if file still exists
-            if (!File::exists($fullPath)) {
+            if (! File::exists($fullPath)) {
                 if ($debug) {
-                    $this->line('    🗑️  DELETED: ' . $dbFile->file_path);
+                    $this->line(__('filament-watchdog-v5::messages.command.scan.deleted_file_log', ['path' => $dbFile->file_path]));
                 }
 
                 // Mark as deleted
@@ -179,27 +188,27 @@ class ScanFilesCommand extends Command
                         'type' => 'file_deleted',
                         'detected_at' => now()->toISOString(),
                         'previous_hash' => $dbFile->file_hash,
-                        'previous_size' => $dbFile->file_size
-                    ]
+                        'previous_size' => $dbFile->file_size,
+                    ],
                 ]);
 
                 // Create alert for deleted file
                 try {
                     app(AlertService::class)->createAlert(
                         'file_deleted',
-                        'File Deleted: ' . basename($dbFile->file_path),
-                        'A monitored file has been deleted: ' . $dbFile->file_path,
+                        'File Deleted: '.basename($dbFile->file_path),
+                        'A monitored file has been deleted: '.$dbFile->file_path,
                         'high',
                         [
                             'file_path' => $dbFile->file_path,
                             'previous_hash' => $dbFile->file_hash,
                             'previous_size' => $dbFile->file_size,
-                            'detected_at' => now()->toISOString()
+                            'detected_at' => now()->toISOString(),
                         ]
                     );
                 } catch (\Exception $e) {
                     if ($debug) {
-                        $this->warn('Failed to create alert for deleted file: ' . $e->getMessage());
+                        $this->warn('Failed to create alert for deleted file: '.$e->getMessage());
                     }
                 }
 
@@ -208,21 +217,22 @@ class ScanFilesCommand extends Command
         }
 
         if (count($deletedFiles) > 0) {
-            $this->error('🚨 Found ' . count($deletedFiles) . ' deleted files:');
+            $this->error(__('filament-watchdog-v5::messages.command.scan.found_deleted', ['count' => count($deletedFiles)]));
             foreach ($deletedFiles as $deleted) {
-                $this->line('  - ' . $deleted['status'] . ': ' . $deleted['path']);
+                $this->line('  - '.$deleted['status'].': '.$deleted['path']);
             }
         } else {
-            $this->info('✅ No deleted files detected.');
+            $this->info(__('filament-watchdog-v5::messages.command.scan.no_deleted'));
         }
     }
 
     private function scanForMalware(bool $debug = false): void
     {
-        $this->info('🦠 Scanning for malware...');
+        $this->info(__('filament-watchdog-v5::messages.command.scan.scanning_malware'));
 
-        if (!config('filament-watchdog.malware_detection.enabled')) {
-            $this->warn('Malware detection is disabled.');
+        if (! config('filament-watchdog.malware_detection.enabled')) {
+            $this->warn(__('filament-watchdog-v5::messages.command.scan.malware_disabled'));
+
             return;
         }
 
@@ -232,7 +242,7 @@ class ScanFilesCommand extends Command
 
         foreach ($paths as $path) {
             $fullPath = base_path($path);
-            if (!File::exists($fullPath)) {
+            if (! File::exists($fullPath)) {
                 continue;
             }
 
@@ -249,12 +259,12 @@ class ScanFilesCommand extends Command
         }
 
         if (count($detections) > 0) {
-            $this->error('🚨 Found ' . count($detections) . ' malware detections:');
+            $this->error(__('filament-watchdog-v5::messages.command.scan.found_malware', ['count' => count($detections)]));
             foreach ($detections as $detection) {
-                $this->line('  - ' . $detection['threat_type'] . ': ' . $detection['file_path']);
+                $this->line('  - '.$detection['threat_type'].': '.$detection['file_path']);
             }
         } else {
-            $this->info('✅ No malware detected.');
+            $this->info(__('filament-watchdog-v5::messages.command.scan.no_malware'));
         }
     }
 
@@ -270,20 +280,20 @@ class ScanFilesCommand extends Command
             foreach ($iterator as $file) {
                 if ($file->isFile()) {
                     $filePath = $file->getRealPath();
-                    $relativePath = str_replace(base_path() . '/', '', $filePath);
+                    $relativePath = str_replace(base_path().'/', '', $filePath);
 
-                    if (!$this->isExcluded($relativePath, $excluded)) {
+                    if (! $this->isExcluded($relativePath, $excluded)) {
                         $files[] = $filePath;
                         if ($debug) {
-                            $this->line('    Found: ' . $relativePath);
+                            $this->line(__('filament-watchdog-v5::messages.command.scan.found_file', ['path' => $relativePath]));
                         }
                     } elseif ($debug) {
-                        $this->line('    Excluded: ' . $relativePath);
+                        $this->line(__('filament-watchdog-v5::messages.command.scan.excluded_file', ['path' => $relativePath]));
                     }
                 }
             }
         } catch (\Exception $e) {
-            $this->warn('Error reading path ' . $path . ': ' . $e->getMessage());
+            $this->warn(__('filament-watchdog-v5::messages.command.scan.error_reading', ['path' => $path, 'error' => $e->getMessage()]));
         }
 
         return $files;
@@ -296,18 +306,19 @@ class ScanFilesCommand extends Command
                 return true;
             }
         }
+
         return false;
     }
 
     private function processFileForBaseline(string $filePath, bool $debug = false): void
     {
-        $relativePath = str_replace(base_path() . '/', '', $filePath);
+        $relativePath = str_replace(base_path().'/', '', $filePath);
         $hash = hash_file('sha256', $filePath);
         $size = filesize($filePath);
         $lastModified = filemtime($filePath);
 
         if ($debug) {
-            $this->line('    Baseline: ' . $relativePath);
+            $this->line(__('filament-watchdog-v5::messages.command.scan.baseline_file', ['path' => $relativePath]));
         }
 
         FileIntegrityCheck::updateOrCreate(
@@ -324,17 +335,17 @@ class ScanFilesCommand extends Command
 
     private function checkFileIntegrity(string $filePath, bool $debug = false): ?array
     {
-        $relativePath = str_replace(base_path() . '/', '', $filePath);
+        $relativePath = str_replace(base_path().'/', '', $filePath);
         $hash = hash_file('sha256', $filePath);
         $size = filesize($filePath);
         $lastModified = filemtime($filePath);
 
         $existing = FileIntegrityCheck::where('file_path', $relativePath)->first();
 
-        if (!$existing) {
+        if (! $existing) {
             // New file detected
             if ($debug) {
-                $this->line('    🆕 NEW FILE: ' . $relativePath);
+                $this->line(__('filament-watchdog-v5::messages.command.scan.new_file_log', ['path' => $relativePath]));
             }
 
             FileIntegrityCheck::create([
@@ -346,7 +357,7 @@ class ScanFilesCommand extends Command
                 'changes' => [
                     'type' => 'new_file',
                     'detected_at' => now()->toISOString(),
-                    'file_size' => $size
+                    'file_size' => $size,
                 ],
             ]);
 
@@ -354,18 +365,18 @@ class ScanFilesCommand extends Command
             try {
                 app(AlertService::class)->createAlert(
                     'new_file_detected',
-                    'New File Detected: ' . basename($relativePath),
-                    'A new file has been detected in the monitored directories: ' . $relativePath,
+                    'New File Detected: '.basename($relativePath),
+                    'A new file has been detected in the monitored directories: '.$relativePath,
                     'medium',
                     [
                         'file_path' => $relativePath,
                         'file_size' => $size,
-                        'detected_at' => now()->toISOString()
+                        'detected_at' => now()->toISOString(),
                     ]
                 );
             } catch (\Exception $e) {
                 if ($debug) {
-                    $this->warn('Failed to create alert: ' . $e->getMessage());
+                    $this->warn(__('filament-watchdog-v5::messages.command.scan.failed_alert', ['error' => $e->getMessage()]));
                 }
             }
 
@@ -375,7 +386,7 @@ class ScanFilesCommand extends Command
         if ($existing->file_hash !== $hash) {
             // Modified file
             if ($debug) {
-                $this->line('    🔄 MODIFIED: ' . $relativePath);
+                $this->line(__('filament-watchdog-v5::messages.command.scan.modified_file_log', ['path' => $relativePath]));
             }
 
             $changes = [
@@ -386,7 +397,7 @@ class ScanFilesCommand extends Command
                 'new_size' => $size,
                 'old_modified' => $existing->last_modified,
                 'new_modified' => date('Y-m-d H:i:s', $lastModified),
-                'detected_at' => now()->toISOString()
+                'detected_at' => now()->toISOString(),
             ];
 
             $existing->update([
@@ -401,14 +412,14 @@ class ScanFilesCommand extends Command
             try {
                 app(AlertService::class)->createAlert(
                     'file_modified',
-                    'File Modified: ' . basename($relativePath),
-                    'A monitored file has been modified: ' . $relativePath,
+                    'File Modified: '.basename($relativePath),
+                    'A monitored file has been modified: '.$relativePath,
                     'medium',
                     ['file_path' => $relativePath, 'changes' => $changes]
                 );
             } catch (\Exception $e) {
                 if ($debug) {
-                    $this->warn('Failed to create alert: ' . $e->getMessage());
+                    $this->warn(__('filament-watchdog-v5::messages.command.scan.failed_alert', ['error' => $e->getMessage()]));
                 }
             }
 
@@ -416,7 +427,7 @@ class ScanFilesCommand extends Command
         }
 
         if ($debug) {
-            $this->line('    ✓ Clean: ' . $relativePath);
+            $this->line(__('filament-watchdog-v5::messages.command.scan.clean_file_log', ['path' => $relativePath]));
         }
 
         return null;
@@ -424,14 +435,24 @@ class ScanFilesCommand extends Command
 
     private function scanFileForMalware(string $filePath, bool $debug = false): ?array
     {
-        $relativePath = str_replace(base_path() . '/', '', $filePath);
+        $relativePath = str_replace(base_path().'/', '', $filePath);
         $content = File::get($filePath);
         $signatures = config('filament-watchdog.malware_detection.signatures', []);
 
         foreach ($signatures as $threatType => $pattern) {
             if (preg_match($pattern, $content, $matches)) {
+                // Prevent duplicate detections for the same file and threat type
+                $exists = MalwareDetection::where('file_path', $relativePath)
+                    ->where('threat_type', $threatType)
+                    ->whereIn('status', ['detected', 'quarantined'])
+                    ->exists();
+
+                if ($exists) {
+                    continue;
+                }
+
                 if ($debug) {
-                    $this->line('    🦠 MALWARE: ' . $relativePath . ' (' . $threatType . ')');
+                    $this->line(__('filament-watchdog-v5::messages.command.scan.malware_file_log', ['path' => $relativePath, 'type' => $threatType]));
                 }
 
                 $detection = [
@@ -442,7 +463,7 @@ class ScanFilesCommand extends Command
                         'matched_text' => $matches[0] ?? '',
                         'file_size' => filesize($filePath),
                         'scan_time' => now()->toISOString(),
-                        'line_number' => $this->getLineNumber($content, $matches[0] ?? '')
+                        'line_number' => $this->getLineNumber($content, $matches[0] ?? ''),
                     ],
                     'risk_level' => $this->calculateRiskLevel($threatType),
                     'status' => 'detected',
@@ -454,18 +475,18 @@ class ScanFilesCommand extends Command
                 try {
                     app(AlertService::class)->createAlert(
                         'malware_detected',
-                        'Malware Detected: ' . basename($relativePath),
-                        'Malware threat detected in file: ' . $relativePath . ' (Type: ' . $threatType . ')',
+                        'Malware Detected: '.basename($relativePath),
+                        'Malware threat detected in file: '.$relativePath.' (Type: '.$threatType.')',
                         'critical',
                         [
                             'file_path' => $relativePath,
                             'threat_type' => $threatType,
-                            'risk_level' => $this->calculateRiskLevel($threatType)
+                            'risk_level' => $this->calculateRiskLevel($threatType),
                         ]
                     );
                 } catch (\Exception $e) {
                     if ($debug) {
-                        $this->warn('Failed to create alert: ' . $e->getMessage());
+                        $this->warn('Failed to create alert: '.$e->getMessage());
                     }
                 }
 
@@ -488,6 +509,7 @@ class ScanFilesCommand extends Command
                 return $lineNumber + 1;
             }
         }
+
         return 0;
     }
 

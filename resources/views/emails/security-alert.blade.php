@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Alert</title>
+    <title>{{ __('filament-watchdog-v5::messages.mail.security_alert.title') }}</title>
     <style>
         body { margin: 0; padding: 0; background: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         .wrapper { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -30,36 +30,36 @@
 
     <div class="header">
         <div class="header-icon">🛡️</div>
-        <h1>Security Alert</h1>
-        <p>{{ config('app.name') }} — FilamentWatchdog</p>
+        <h1>{{ __('filament-watchdog-v5::messages.mail.security_alert.title') }}</h1>
+        <p>{{ config('app.name') }}</p>
         <span class="severity-badge">{{ strtoupper($alert->severity) }}</span>
     </div>
 
     <div class="body">
 
         <div class="field">
-            <div class="field-label">Alert</div>
+            <div class="field-label">{{ __('filament-watchdog-v5::messages.mail.security_alert.alert') }}</div>
             <div class="field-value" style="font-size:18px;font-weight:600;color:#0f172a;">{{ $alert->title }}</div>
         </div>
 
         <div class="field">
-            <div class="field-label">Description</div>
+            <div class="field-label">{{ __('filament-watchdog-v5::messages.mail.security_alert.description') }}</div>
             <div class="field-value">{{ $alert->description }}</div>
         </div>
 
         <div class="field">
-            <div class="field-label">Alert Type</div>
-            <div class="field-value">{{ str_replace('_', ' ', ucfirst($alert->alert_type)) }}</div>
+            <div class="field-label">{{ __('filament-watchdog-v5::messages.mail.security_alert.alert_type') }}</div>
+            <div class="field-value">{{ __('filament-watchdog-v5::messages.alert_types.' . $alert->alert_type) }}</div>
         </div>
 
         <div class="field">
-            <div class="field-label">Detected at</div>
-            <div class="field-value">{{ $alert->created_at->format('D, d M Y — H:i:s T') }}</div>
+            <div class="field-label">{{ __('filament-watchdog-v5::messages.mail.security_alert.detected_at') }}</div>
+            <div class="field-value">{{ $alert->created_at->format('d/m/Y H:i:s') }}</div>
         </div>
 
         @if(!empty($alert->metadata))
             <div class="field">
-                <div class="field-label">Details</div>
+                <div class="field-label">{{ __('filament-watchdog-v5::messages.mail.security_alert.details') }}</div>
                 <div class="metadata">
                     <pre>{{ json_encode($alert->metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
                 </div>
@@ -67,7 +67,7 @@
         @endif
 
         @if($dashboardUrl)
-            <a href="{{ $dashboardUrl }}" class="action-btn">View Security Dashboard</a>
+            <a href="{{ $dashboardUrl }}" class="action-btn">{{ __('filament-watchdog-v5::messages.mail.security_alert.view_dashboard') }}</a>
         @endif
 
     </div>
@@ -76,9 +76,9 @@
 
     <div class="footer">
         <p>
-            This is an automated alert from <strong>FilamentWatchdog</strong>.<br>
-            To adjust alert settings, update your <code>config/filament-watchdog.php</code>.<br>
-            To stop receiving these emails, set <code>alerts.email_enabled</code> to <code>false</code>.
+            {!! __('filament-watchdog-v5::messages.mail.security_alert.footer_automated') !!}
+            {!! __('filament-watchdog-v5::messages.mail.security_alert.footer_settings') !!}
+            {!! __('filament-watchdog-v5::messages.mail.security_alert.footer_stop') !!}
         </p>
     </div>
 

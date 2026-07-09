@@ -5,6 +5,7 @@ namespace MKWebDesign\FilamentWatchdog\Services;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use MKWebDesign\FilamentWatchdog\Models\SecurityAlert;
@@ -27,12 +28,12 @@ public function activateEmergencyLockdown(array $options = []): array
         // 1. Create critical alert with full audit trail
         $alert = $this->alertService->createAlert(
             'emergency_lockdown',
-            '🚨 EMERGENCY LOCKDOWN ACTIVATED',
-            'System-wide emergency lockdown has been activated. All non-essential access has been restricted.',
+            __('filament-watchdog-v5::messages.service.emergency.alert_title'),
+            __('filament-watchdog-v5::messages.service.emergency.alert_body'),
             'critical',
             [
                 'lockdown_id' => $lockdownId,
-                'activated_by' => auth()->user()->name ?? 'System',
+                'activated_by' => Auth::user()?->name ?? 'System',
                 'activated_at' => now()->toISOString(),
                 'ip_address' => $this->getRealIpAddress(),
                 'user_agent' => request()->userAgent(),
@@ -93,7 +94,7 @@ public function activateEmergencyLockdown(array $options = []): array
         Cache::put('emergency_lockdown_active', [
             'lockdown_id' => $lockdownId,
             'activated_at' => now(),
-            'activated_by' => auth()->user()->name ?? 'System',
+            'activated_by' => Auth::user()?->name ?? 'System',
             'alert_id' => $alert->id,
             'options' => $options
         ], now()->addHours(24));
@@ -216,7 +217,7 @@ private function getEmergencyPageTemplate(): string
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚨 Emergency Security Lockdown - FilamentWatchdog</title>
+    <title>{{ __("filament-watchdog-v5::messages.service.emergency.view.title") }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -427,56 +428,54 @@ private function getEmergencyPageTemplate(): string
     <div class="container">
         <div class="lockdown-icon">🚨</div>
         
-        <h1 class="main-title">Emergency Security Lockdown</h1>
+        <h1 class="main-title">{{ __("filament-watchdog-v5::messages.service.emergency.view.main_title") }}</h1>
         
         <p class="subtitle">
-            Our security system has temporarily restricted access to protect your data. 
-            We are working to resolve this situation as quickly as possible.
+            {{ __("filament-watchdog-v5::messages.service.emergency.view.subtitle") }}
         </p>
 
         <div class="status-card">
-            <h2 class="status-title">🛡️ Security Measures Active</h2>
+            <h2 class="status-title">{{ __("filament-watchdog-v5::messages.service.emergency.view.status_title") }}</h2>
             <ul class="status-list">
                 <li>
                     <span class="status-icon">🔒</span>
-                    <span>Site access restricted to authorized administrators</span>
+                    <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_1") }}</span>
                 </li>
                 <li>
                     <span class="status-icon">🧹</span>
-                    <span>All user sessions have been cleared</span>
+                    <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_2") }}</span>
                 </li>
                 <li>
                     <span class="status-icon">💾</span>
-                    <span>Emergency backup created and secured</span>
+                    <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_3") }}</span>
                 </li>
                 <li>
                     <span class="status-icon">📧</span>
-                    <span>Administrators have been notified</span>
+                    <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_4") }}</span>
                 </li>
                 <li>
                     <span class="status-icon">🔍</span>
-                    <span>Security analysis in progress</span>
+                    <span>{{ __("filament-watchdog-v5::messages.service.emergency.view.status_5") }}</span>
                 </li>
             </ul>
         </div>
 
         <div class="admin-section">
-            <h3 class="admin-title">👨‍💻 Administrator Access</h3>
+            <h3 class="admin-title">{{ __("filament-watchdog-v5::messages.service.emergency.view.admin_title") }}</h3>
             <p class="admin-text">
-                If you are a system administrator, check your email for the emergency access link 
-                or use the secret key provided during lockdown activation.
+                {{ __("filament-watchdog-v5::messages.service.emergency.view.admin_text") }}
             </p>
         </div>
 
         <div class="timeline">
-            <p><strong>Lockdown activated:</strong> <span id="lockdown-time"></span></p>
-            <p><strong>Expected resolution:</strong> Within 1-2 hours</p>
+            <p><strong>{{ __("filament-watchdog-v5::messages.service.emergency.view.timeline_activated") }}</strong> <span id="lockdown-time"></span></p>
+            <p><strong>{{ __("filament-watchdog-v5::messages.service.emergency.view.timeline_expected") }}</strong> {{ __("filament-watchdog-v5::messages.service.emergency.view.timeline_resolution") }}</p>
         </div>
 
         <div class="footer">
-            <div class="logo">🐕 FilamentWatchdog</div>
-            <p>Advanced Security Monitoring & Protection</p>
-            <p>For urgent matters, contact your system administrator directly.</p>
+            <div class="logo">{{ __("filament-watchdog-v5::messages.service.emergency.view.logo") }}</div>
+            <p>{{ __("filament-watchdog-v5::messages.service.emergency.view.footer_1") }}</p>
+            <p>{{ __("filament-watchdog-v5::messages.service.emergency.view.footer_2") }}</p>
         </div>
     </div>
 
@@ -595,7 +594,7 @@ private function blockIPAddress(string $ip): bool
 private function disableNonAdminUsers(): int
 {
     try {
-        $currentUserEmail = auth()->user()->email ?? '';
+        $currentUserEmail = Auth::user()?->email ?? '';
         $adminEmails = $this->getAdminEmails();
 
         // Get users to disable (exclude current user and admin emails)
@@ -940,11 +939,11 @@ public function deactivateEmergencyLockdown(): array
         // 5. Log deactivation
         $this->alertService->createAlert(
             'emergency_lockdown_deactivated',
-            '✅ Emergency Lockdown Deactivated',
-            'System emergency lockdown has been deactivated. Normal operations resumed.',
+            __('filament-watchdog-v5::messages.service.emergency.deactivated_title'),
+            __('filament-watchdog-v5::messages.service.emergency.deactivated_body'),
             'high',
             [
-                'deactivated_by' => auth()->user()->name ?? 'System',
+                'action_by' => Auth::user()?->name ?? 'System',
                 'deactivated_at' => now()->toISOString(),
                 'ip_address' => $this->getRealIpAddress()
             ]
@@ -1041,7 +1040,7 @@ private function sendLockdownNotification(string $email, array $details): void
     try {
         Mail::send([], [], function ($message) use ($email, $details) {
             $message->to($email)
-                ->subject('🚨 EMERGENCY LOCKDOWN ACTIVATED - IMMEDIATE ACTION REQUIRED')
+                ->subject(__('filament-watchdog-v5::messages.service.emergency.email.subject'))
                 ->html($this->buildLockdownEmailContent($details));
         });
     } catch (\Exception $e) {
@@ -1057,71 +1056,71 @@ private function buildLockdownEmailContent(array $details): string
 
     return "
         <div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">
-            <h1 style=\"color: #dc3545; text-align: center;\">🚨 EMERGENCY LOCKDOWN ACTIVATED</h1>
-            <h2 style=\"color: #dc3545; text-align: center;\">IMMEDIATE ATTENTION REQUIRED</h2>
+            <h1 style=\"color: #dc3545; text-align: center;\">" . __('filament-watchdog-v5::messages.service.emergency.email.header_title') . "</h1>
+            <h2 style=\"color: #dc3545; text-align: center;\">" . __('filament-watchdog-v5::messages.service.emergency.email.header_subtitle') . "</h2>
             
             <div style=\"background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;\">
-                <p><strong>An emergency security lockdown has been activated on your system.</strong></p>
+                <p><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.intro_text') . "</strong></p>
             </div>
             
-            <h3 style=\"color: #495057;\">📋 Lockdown Details:</h3>
+            <h3 style=\"color: #495057;\">" . __('filament-watchdog-v5::messages.service.emergency.email.details_title') . "</h3>
             <table style=\"width: 100%; border-collapse: collapse;\">
-                <tr><td><strong>Lockdown ID:</strong></td><td>{$details['lockdown_id']}</td></tr>
-                <tr><td><strong>Alert ID:</strong></td><td>{$details['alert_id']}</td></tr>
-                <tr><td><strong>Activated By:</strong></td><td>{$details['activated_by']}</td></tr>
-                <tr><td><strong>Time:</strong></td><td>{$details['activated_at']}</td></tr>
-                <tr><td><strong>IP Address:</strong></td><td>{$details['ip_address']}</td></tr>
+                <tr><td><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.id') . ":</strong></td><td>{$details['lockdown_id']}</td></tr>
+                <tr><td><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.alert_id') . ":</strong></td><td>{$details['alert_id']}</td></tr>
+                <tr><td><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.activated_by') . ":</strong></td><td>{$details['activated_by']}</td></tr>
+                <tr><td><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.time') . ":</strong></td><td>{$details['activated_at']}</td></tr>
+                <tr><td><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.ip') . ":</strong></td><td>{$details['ip_address']}</td></tr>
             </table>
 
-            <h3 style=\"color: #495057;\">🔑 Emergency Access Options:</h3>
+            <h3 style=\"color: #495057;\">" . __('filament-watchdog-v5::messages.service.emergency.email.access_options') . "</h3>
             <div style=\"background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-                <h4>Option 1: Primary Access URL (Recommended)</h4>
+                <h4>" . __('filament-watchdog-v5::messages.service.emergency.email.option_1') . "</h4>
                 <p><a href=\"{$primaryAccessUrl}\" style=\"background: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;\">{$primaryAccessUrl}</a></p>
                 
-                <h4>Option 2: Alternative URLs (if primary doesn't work)</h4>
+                <h4>" . __('filament-watchdog-v5::messages.service.emergency.email.option_2') . "</h4>
                 <ul>
                     <li><a href=\"{$alternativeAccessUrl}\">{$alternativeAccessUrl}</a></li>
                     <li><a href=\"{$adminUrl}\">{$adminUrl}</a></li>
                 </ul>
                 
-                <h4>Option 3: Command Line Access</h4>
+                <h4>" . __('filament-watchdog-v5::messages.service.emergency.email.option_3') . "</h4>
                 <code style=\"background: #f8f9fa; padding: 5px; border-radius: 3px; display: block; margin: 5px 0;\">
                     php artisan up --secret={$details['secret_key']}
                 </code>
-                <p><em>Then navigate to your admin panel: <a href=\"" . url('/admin') . "\">" . url('/admin') . "</a></em></p>
+                <p><em>" . __('filament-watchdog-v5::messages.service.emergency.email.then_navigate') . " <a href=\"" . url('/admin') . "\">" . url('/admin') . "</a></em></p>
             </div>
             
-            <h3 style=\"color: #495057;\">⚠️ Actions Taken:</h3>
+            <h3 style=\"color: #495057;\">" . __('filament-watchdog-v5::messages.service.emergency.email.actions_taken') . "</h3>
             <ul>
-                <li>✅ Maintenance mode activated</li>
-                <li>✅ Suspicious IPs blocked</li>
-                <li>✅ User sessions cleared</li>
-                <li>✅ Emergency backup created</li>
-                <li>✅ Enhanced security protection enabled</li>
+                <li>✅ " . __('filament-watchdog-v5::messages.service.emergency.email.action_1') . "</li>
+                <li>✅ " . __('filament-watchdog-v5::messages.service.emergency.email.action_2') . "</li>
+                <li>✅ " . __('filament-watchdog-v5::messages.service.emergency.email.action_3') . "</li>
+                <li>✅ " . __('filament-watchdog-v5::messages.service.emergency.email.action_4') . "</li>
+                <li>✅ " . __('filament-watchdog-v5::messages.service.emergency.email.action_5') . "</li>
             </ul>
 
-            <h3 style=\"color: #495057;\">🔧 Next Steps:</h3>
+            <h3 style=\"color: #495057;\">" . __('filament-watchdog-v5::messages.service.emergency.email.next_steps') . "</h3>
             <ol>
-                <li><strong>Access the system</strong> using one of the emergency URLs above</li>
-                <li><strong>Review the security dashboard</strong> immediately</li>
-                <li><strong>Investigate the security incident</strong> that triggered the lockdown</li>
-                <li><strong>Deactivate lockdown</strong> when the threat is resolved</li>
+                <li><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.step_1_strong') . "</strong> " . __('filament-watchdog-v5::messages.service.emergency.email.step_1') . "</li>
+                <li><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.step_2_strong') . "</strong> " . __('filament-watchdog-v5::messages.service.emergency.email.step_2') . "</li>
+                <li><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.step_3_strong') . "</strong> " . __('filament-watchdog-v5::messages.service.emergency.email.step_3') . "</li>
+                <li><strong>" . __('filament-watchdog-v5::messages.service.emergency.email.step_4_strong') . "</strong> " . __('filament-watchdog-v5::messages.service.emergency.email.step_4') . "</li>
             </ol>
 
             <div style=\"background: #d1ecf1; padding: 15px; border-radius: 8px; margin: 20px 0;\">
-                <h4 style=\"color: #0c5460;\">💡 Access Troubleshooting:</h4>
+                <h4 style=\"color: #0c5460;\">" . __('filament-watchdog-v5::messages.service.emergency.email.troubleshooting') . "</h4>
                 <ul>
-                    <li>Try the primary URL first</li>
-                    <li>If you get a maintenance page, check the URL format</li>
-                    <li>Clear your browser cache if needed</li>
-                    <li>Use CLI access as a fallback option</li>
-                    <li>Contact your hosting provider if none work</li>
+                    <li>" . __('filament-watchdog-v5::messages.service.emergency.email.ts_1') . "</li>
+                    <li>" . __('filament-watchdog-v5::messages.service.emergency.email.ts_2') . "</li>
+                    <li>" . __('filament-watchdog-v5::messages.service.emergency.email.ts_3') . "</li>
+                    <li>" . __('filament-watchdog-v5::messages.service.emergency.email.ts_4') . "</li>
+                    <li>" . __('filament-watchdog-v5::messages.service.emergency.email.ts_5') . "</li>
                 </ul>
             </div>
 
             <hr style=\"margin: 30px 0;\">
-            <p style=\"font-size: 12px; color: #6c757d;\"><em>This is an automated emergency notification from FilamentWatchdog Security System.</em></p>
-            <p style=\"font-size: 12px; color: #6c757d;\"><em>Do not reply to this email. Access the admin panel for more information.</em></p>
+            <p style=\"font-size: 12px; color: #6c757d;\"><em>" . __('filament-watchdog-v5::messages.service.emergency.email.footer_1') . "</em></p>
+            <p style=\"font-size: 12px; color: #6c757d;\"><em>" . __('filament-watchdog-v5::messages.service.emergency.email.footer_2') . "</em></p>
         </div>
         ";
 }
